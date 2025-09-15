@@ -17,18 +17,38 @@ function loadQRCodeLib() {
   try {
     if (typeof window.QRCode === 'function') return Promise.resolve(true);
     if (_qrLoadPromise) return _qrLoadPromise;
-    _qrLoadPromise = new Promise((resolve) => {
+
+    const sources = [
+      'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js',
+      'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js',
+      'https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js'
+    ];
+
+    const loadFrom = (url) => new Promise((resolve) => {
       try {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
-        script.async = true;
-        script.onload = () => resolve(typeof window.QRCode === 'function');
-        script.onerror = () => resolve(false);
-        document.head.appendChild(script);
+        const s = document.createElement('script');
+        s.src = url;
+        s.async = true;
+        // Guard with timeout so we can try next CDN quickly
+        const to = setTimeout(() => { s.onerror?.(new Error('timeout')); }, 5000);
+        s.onload = () => { clearTimeout(to); resolve(typeof window.QRCode === 'function'); };
+        s.onerror = () => { clearTimeout(to); resolve(false); };
+        document.head.appendChild(s);
       } catch {
         resolve(false);
       }
     });
+
+    _qrLoadPromise = (async () => {
+      // If already present (e.g., included in HTML), short-circuit
+      if (typeof window.QRCode === 'function') return true;
+      for (const url of sources) {
+        const ok = await loadFrom(url);
+        if (ok) return true;
+      }
+      return (typeof window.QRCode === 'function');
+    })();
+
     return _qrLoadPromise;
   } catch { return Promise.resolve(false); }
 }
