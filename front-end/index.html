@@ -1,50 +1,159 @@
 <!DOCTYPE html>
-<html lang="th">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Open House QR Check-in</title>
-    <link rel="stylesheet" href="./assets/css/style.css" />
-    <script src="assets/js/config.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  </head>
-  <body>
-    <header class="app-header">
-      <div class="brand">
-        <span class="logo">QR</span>
-        <span class="title">Open House QR Check-in</span>
-      </div>
-      <nav class="tabs" role="navigation" aria-label="primary">
-        <a class="tab active" href="index.html">สร้าง QR ของคุณ</a>
-        <a class="tab" href="checkin.html">เดโมเช็คอิน</a>
-      </nav>
-    </header>
+<html lang="th" translate="no">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>QR สุ่ม • กลางจอ + ปุ่ม</title>
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0c10" />
+  <style>
+    :root{ --bg:#0b0c10; --fg:#e5e7eb; --muted:#9ca3af; --card:#111318; --shadow:0 8px 32px rgba(0,0,0,.45); --accent:#2563eb;}
+    @media (prefers-color-scheme: light){ :root{ --bg:#ffffff; --fg:#0b0c10; --muted:#6b7280; --card:#f5f6f8; --shadow:0 6px 24px rgba(0,0,0,.08);} }
+    html,body{height:100%;}
+    body{margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;}
+    main.center{min-height:100dvh; padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 96px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;}
+    .title{font-weight:800; letter-spacing:.2px; text-align:center; margin:0 0 6px;}
+    .size{color:var(--muted); font-weight:700; letter-spacing:.2px; text-align:center;}
+    .qr-box{display:flex; align-items:center; justify-content:center; background:var(--card); padding:18px; border-radius:22px; box-shadow:var(--shadow);}
+    img.qr{ width:min(78vw, 360px); height:auto; aspect-ratio:1/1; border-radius:16px; background:#fff; display:block; }
+    .uuid{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.95rem; color:var(--muted); word-break:break-all; text-align:center;}
+    .btns{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; width:min(92vw, 440px);}
+    button{appearance:none; border:none; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:800; background:var(--accent); color:#fff; box-shadow:var(--shadow); min-height:44px;}
+    .btn-dark{background:#111827;}
+    .btn-good{background:#16a34a;}
+    .btn-float-right{position:fixed; top:calc(10px + env(safe-area-inset-top)); right:12px; z-index:1000; background:#0ea5e9;}
+    .btn-play{position:fixed; bottom:calc(16px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:min(92vw, 440px); z-index:1000; background:#22c55e; font-size:1.05rem;}
+    .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); padding:10px 14px; border-radius:12px; background:rgba(0,0,0,.85); color:#fff; z-index:9999;}
+  </style>
+</head>
+<body>
+  <!-- ปุ่มฐานการเรียนรู้ มุมขวาบน -->
+  <button id="btnTask" class="btn-float-right">ฐานการเรียนรู้</button>
 
-    <main class="views container">
-      <section class="view active">
-        <div class="card">
-          <h2>การดสร้าง QR Code ของคุณ</h2>
-          <div class="field">
-            <label for="name-input">ชื่อที่แสดง (Display Name)</label>
-            <input id="name-input" type="text" placeholder="เช่น Alice" />
-          </div>
-          <div class="field">
-            <label for="email-input">อีเมล (ใช้ idempotent)</label>
-            <input id="email-input" type="text" placeholder="เช่น alice@example.com" />
-          </div>
-          <div class="actions">
-            <button id="btn-generate" class="btn primary">สร้าง QR Code</button>
-          </div>
-          <div id="qr-preview" class="qr-frame" aria-live="polite" aria-label="ตัวอย่าง QR"></div>
-          <p id="qr-info" class="meta muted"></p>
-        </div>
-      </section>
-    </main>
+  <main class="center">
+    <h1 class="title">คิวอาร์โค้ด</h1>
 
-    <footer class="app-footer">
-      <span class="muted">Front-end only • localStorage prototype</span>
-    </footer>
+    <!-- ขนาดพิกเซลของไฟล์ QR -->
+    <div id="sizeLabel" class="size">ขนาด: —</div>
 
-    <script src="assets/js/index.js" defer></script>
-  </body>
+    <div class="qr-box">
+      <img id="qrImg" class="qr" alt="QR">
+    </div>
+
+    <!-- แสดงรหัสสั้นที่ใช้เข้ารหัสใน QR จริง -->
+    <div class="uuid" id="uuidText">—</div>
+
+    <!-- ปุ่มสามปุ่มตรงกลางใต้ QR -->
+    <div class="btns">
+      <button id="btnGen">สุ่มคิวอา</button>
+      <button id="btnSave" class="btn-good">บันทึกรูปคิวอา</button>
+      <button id="btnCopy" class="btn-dark">คัดลอกรหัส</button>
+    </div>
+  </main>
+
+  <!-- ปุ่มเล่นเกม กลางล่าง -->
+  <button id="btnPlay" class="btn-play">เล่นเกม</button>
+
+  <script>
+  (function(){
+    var img = document.getElementById('qrImg');
+    var sizeLabel = document.getElementById('sizeLabel');
+    var uuidText = document.getElementById('uuidText');
+    var btnGen = document.getElementById('btnGen');
+    var btnSave = document.getElementById('btnSave');
+    var btnCopy = document.getElementById('btnCopy');
+    var btnTask = document.getElementById('btnTask');
+    var btnPlay = document.getElementById('btnPlay');
+
+    // ขนาดไฟล์ QR (px) ที่จะสร้างจริง ๆ
+    var QR_PX = 1024; // ปรับได้ เช่น 256 / 512 / 1024
+
+    // รหัสสั้นจริง (ไม่ใช่แค่แสดง) — ใช้ตัวอักษรอ่านง่าย (ไม่มี I/O)
+    function shortId(len){
+      var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      var arr = new Uint32Array(len);
+      crypto.getRandomValues(arr);
+      var out = '';
+      for (var i=0;i<len;i++) out += alphabet[arr[i] % alphabet.length];
+      return out;
+    }
+
+    // อัปเดต "ขนาด: W×H px" จากขนาดไฟล์จริง
+    function updateSizeLabel(){
+      if (img.naturalWidth) {
+        sizeLabel.textContent = 'ขนาด: ' + img.naturalWidth + '×' + img.naturalHeight + ' px';
+      } else {
+        sizeLabel.textContent = 'ขนาด: ' + QR_PX + '×' + QR_PX + ' px';
+      }
+    }
+
+    // สร้างภาพ QR ผ่านบริการสาธารณะ (ไฟล์ PNG)
+    function drawQR(text){
+      var base = 'https://api.qrserver.com/v1/create-qr-code/';
+      img.src = base + '?size=' + QR_PX + 'x' + QR_PX + '&format=png&qzone=2&margin=2&data=' + encodeURIComponent(text);
+      sizeLabel.textContent = 'ขนาด: ' + QR_PX + '×' + QR_PX + ' px';
+    }
+
+    function toast(msg){
+      var el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(function(){ el.remove(); }, 1200);
+    }
+
+    function generate(){
+      var code = shortId(12);           // เปลี่ยนความยาวได้ เช่น 8/10/16
+      uuidText.textContent = code;
+      drawQR(code);
+    }
+
+    // ดาวน์โหลด PNG อัตโนมัติ (fetch -> blob -> a.download)
+    async function savePNG(){
+      try{
+        if(!img || !img.src){ toast('ยังไม่มีภาพ QR'); return; }
+        var res = await fetch(img.src, {mode:'cors', cache:'no-store'});
+        if(!res.ok) throw new Error('fetch failed');
+        var blob = await res.blob(); // image/png
+        var url  = URL.createObjectURL(blob);
+        var name = ('qr-' + (uuidText.textContent || Date.now()) + '.png').replace(/[^a-zA-Z0-9._-]/g,'_');
+
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+      }catch(e){
+        // เผื่อกรณีโดนบล็อก CORS แรง ๆ — เปิดแทน
+        window.open(img.src, '_blank');
+      }
+    }
+
+    function copyCode(){
+      var txt = uuidText.textContent || '';
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt);
+      }else{
+        var ta = document.createElement('textarea');
+        ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      }
+      toast('คัดลอกแล้ว');
+    }
+
+    // Events
+    img.addEventListener('load', updateSizeLabel);
+    btnGen.addEventListener('click', generate);
+    btnSave.addEventListener('click', savePNG);
+    btnCopy.addEventListener('click', copyCode);
+    img.addEventListener('click', generate);
+    btnTask.addEventListener('click', function(){ toast('เปิดฐานการเรียนรู้'); });
+    btnPlay.addEventListener('click', function(){ toast('เริ่มเล่นเกม'); });
+
+    // First run
+    generate();
+  })();
+  </script>
+</body>
 </html>
