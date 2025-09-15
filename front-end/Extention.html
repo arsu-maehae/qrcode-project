@@ -8,60 +8,72 @@
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0c10" />
   <style>
     :root{
-      --bg:#0b0c10; --fg:#e5e7eb; --muted:#9ca3af; --card:#0f1117; --card2:#111318; --shadow:0 12px 40px rgba(0,0,0,.45);
-      --good:#16a34a; --warn:#f59e0b; --brand:#3b82f6; --border:rgba(255,255,255,.08);
+      --bg:#0b0c10; --fg:#e5e7eb; --muted:#9ca3af; --card:#0f1117; --card2:#111318;
+      --shadow:0 12px 40px rgba(0,0,0,.45);
+      --good:#16a34a; --brand:#3b82f6; --border:rgba(255,255,255,.08);
       color-scheme: light dark;
     }
     @media (prefers-color-scheme: light){
-      :root{ --bg:#eef2f7; --fg:#0b0c10; --muted:#6b7280; --card:#ffffff; --card2:#f8fafc; --border:rgba(0,0,0,.08); --shadow:0 10px 28px rgba(0,0,0,.1);}  
+      :root{ --bg:#eef2f7; --fg:#0b0c10; --muted:#6b7280; --card:#ffffff; --card2:#f8fafc; --border:rgba(0,0,0,.08); --shadow:0 10px 28px rgba(0,0,0,.1); }
     }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial}
-    .wrap{max-width: 520px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 18px) 14px calc(env(safe-area-inset-bottom) + 20px);}    
-    .card{background:linear-gradient(180deg,var(--card),var(--card2)); border-radius:24px; box-shadow:var(--shadow); border:1px solid var(--border);}
-    header{display:flex; align-items:center; gap:10px; padding:16px 16px 12px}
-    header h1{font-size:1.6rem; letter-spacing:.2px; margin:0}
-    .badge{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:12px; background:#111827}
-    .section{padding:0 16px 16px}
+    *{ box-sizing:border-box }
+    html,body{ height:100% }
+    body{ margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial }
+    .wrap{ max-width:520px; margin:0 auto; padding:calc(env(safe-area-inset-top) + 18px) 14px calc(env(safe-area-inset-bottom) + 20px); }
+    .card{ background:linear-gradient(180deg,var(--card),var(--card2)); border-radius:24px; box-shadow:var(--shadow); border:1px solid var(--border); }
+    header{ display:flex; align-items:center; gap:10px; padding:16px 16px 12px }
+    header h1{ font-size:1.6rem; letter-spacing:.2px; margin:0 }
+    .badge{ display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:12px; background:#111827 }
+    .section{ padding:0 16px 16px }
+    .topbar{ position:sticky; top:0; z-index:5; padding:10px 8px; backdrop-filter:blur(6px) }
 
-    /* Progress block */
-    .progress{display:flex; align-items:center; gap:12px; background:rgba(255,255,255,.02); border:1px solid var(--border); padding:14px; border-radius:16px}
-    .ring{ --p:0; width:58px; height:58px; border-radius:999px; display:grid; place-items:center; background:
-      conic-gradient(var(--good) calc(var(--p)*1%), #2a2e35 0);
-      box-shadow: inset 0 0 0 8px #0b0c10; color:#10b981; font-weight:800;}
-    .ring span{ background:#0b0c10; padding:8px 8px; border-radius:999px; font-size:.95rem;}
-    .progress h3{margin:0; font-size:1.05rem}
-    .progress p{margin:.2rem 0 0; color:var(--muted)}
+    /* Progress */
+    .progress{ display:flex; align-items:center; gap:12px; background:rgba(255,255,255,.02); border:1px solid var(--border); padding:14px; border-radius:16px }
+    .ring{ --p:0; width:58px; height:58px; border-radius:999px; display:grid; place-items:center;
+      background:conic-gradient(var(--good) calc(var(--p)*1%), #2a2e35 0);
+      box-shadow: inset 0 0 0 8px #0b0c10; color:#10b981; font-weight:800; }
+    .ring span{ background:#0b0c10; padding:8px 8px; border-radius:999px; font-size:.95rem; }
+    .progress h3{ margin:0; font-size:1.05rem }
+    .progress p{ margin:.2rem 0 0; color:var(--muted) }
 
-    /* Stations grid */
-    .grid{display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-top:12px}
-    .tile{background:rgba(255,255,255,.02); border:1px solid var(--border); border-radius:16px; padding:14px; text-align:center;}
-    .tile .k{font-size:1.6rem; font-weight:800; letter-spacing:.2px}
-    .tile .s{margin-top:8px; color:var(--muted); font-weight:600}
-    .ok{ color:#34d399; }
-    .time{ display:inline-flex; align-items:center; gap:6px}
-    .time svg{opacity:.85}
+    /* Stations */
+    .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px }
+    .tile{ background:rgba(255,255,255,.02); border:1px solid var(--border); border-radius:16px; padding:14px; text-align:center; cursor:pointer }
+    .tile .k{ font-size:1.6rem; font-weight:800; letter-spacing:.2px }
+    .tile .s{ margin-top:8px; color:var(--muted); font-weight:600 }
+    .ok{ color:#34d399 }
+    .time{ display:inline-flex; align-items:center; gap:6px }
+    .time svg{ opacity:.85 }
 
-    .field{display:flex; flex-direction:column; gap:6px; margin-top:14px}
-    .input{width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,.03); color:var(--fg)}
+    /* Inputs / Buttons */
+    .field{ display:flex; flex-direction:column; gap:6px; margin-top:14px }
+    .input{ width:100%; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,.03); color:var(--fg) }
+    .cert{ margin-top:12px; background:rgba(255,255,255,.02); border:1px solid var(--border); border-radius:16px; padding:14px }
+    .btn{ appearance:none; border:none; cursor:pointer; padding:12px 16px; border-radius:14px; font-weight:800; color:#fff; background:var(--brand); width:100%; box-shadow:var(--shadow) }
+    .btn[disabled]{ opacity:.5; filter:grayscale(.4); cursor:not-allowed }
+    .row{ display:flex; gap:8px; align-items:center; justify-content:space-between }
+    a.link{ color:#93c5fd; text-decoration:none }
 
-    .cert{margin-top:12px; background:rgba(255,255,255,.02); border:1px solid var(--border); border-radius:16px; padding:14px}
-    .btn{appearance:none; border:none; cursor:pointer; padding:12px 16px; border-radius:14px; font-weight:800; color:#fff; background:var(--brand); width:100%; box-shadow:var(--shadow);}
-    .btn[disabled]{opacity:.5; filter:grayscale(.4); cursor:not-allowed}
+    footer{ padding:10px 16px 16px; text-align:center; color:var(--muted) }
 
-    footer{padding:10px 16px 16px; text-align:center; color:var(--muted)}
-    .topbar{position:sticky; top:0; z-index:5; padding:10px 0; backdrop-filter: blur(6px)}
-
-    .subtle{color:var(--muted)}
-    .row{display:flex; gap:8px; align-items:center; justify-content:space-between}
-    a.link{color:#93c5fd; text-decoration:none}
+    /* Back button bottom-left */
+    .back{ appearance:none; border:1px solid var(--border); background:rgba(255,255,255,.04); color:var(--fg);
+      padding:8px 12px; border-radius:12px; font-weight:700; display:inline-flex; align-items:center; gap:8px; cursor:pointer }
+    .back svg{ opacity:.9 }
+    .back-fixed{ position:fixed; left:12px; bottom:calc(16px + env(safe-area-inset-bottom)); z-index:1000 }
   </style>
 </head>
 <body>
   <div class="wrap">
+    <!-- ปุ่มย้อนกลับ มุมซ้ายล่าง -->
+    <button id="backBtn" class="back back-fixed" type="button" aria-label="ย้อนกลับ">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      ย้อนกลับ
+    </button>
+
     <div class="card">
       <div class="topbar"></div>
+
       <header>
         <div class="badge" aria-hidden="true">
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4h6v6H4V4Zm10 0h6v2h-4v4h-2V4ZM4 14h2v4h4v2H4v-6Zm10 0h2v2h-2v-2Zm4 0h2v2h-2v-2Zm-4 4h2v2h-2v-2Zm4 2h2v-2h-2v2Z" fill="#e5e7eb"/></svg>
@@ -80,11 +92,9 @@
         </div>
 
         <!-- Stations -->
-        <div class="grid" id="grid">
-          <!-- tiles injected by JS -->
-        </div>
+        <div class="grid" id="grid"><!-- tiles injected by JS --></div>
 
-        <!-- Code box -->
+        <!-- Code -->
         <div class="field">
           <label>รหัสโค้ดของคุณ</label>
           <div class="row">
@@ -113,126 +123,141 @@
   </div>
 
   <script>
-    (function(){
-      // ----- Config -----
-      var TOTAL = 5;        // จำนวนฐานทั้งหมด A..E
-      var NEED = 3;         // ต้องเข้ากี่ฐานถึงจะกดขอใบประกาศได้
-      var STATIONS = ['A','B','C','D','E'];
+  (function(){
+    // ----- Config -----
+    var TOTAL = 5;                 // จำนวนฐานทั้งหมด A..E
+    var NEED  = 3;                 // ต้องเข้าอย่างน้อยกี่ฐานถึงจะขอ Certificate ได้
+    var STATIONS = ['A','B','C','D','E'];
 
-      var state = loadState() || { code:'', visit:{}, server:'192.168.0.10' };
+    var state = loadState() || { code:'', visit:{}, server:'192.168.0.10' };
 
-      // อ่านพารามิเตอร์จาก URL (เช่น ?code=XXXX&server=1.2.3.4)
-      var sp = new URLSearchParams(location.search);
-      if (sp.get('code')) state.code = sp.get('code');
-      if (sp.get('server')) state.server = sp.get('server');
+    // อ่าน query จาก URL (เช่น ?code=XXXX&server=1.2.3.4)
+    var sp = new URLSearchParams(location.search);
+    if (sp.get('code'))   state.code   = sp.get('code');
+    if (sp.get('server')) state.server = sp.get('server');
 
-      // DOM refs
-      var grid = document.getElementById('grid');
-      var codeInput = document.getElementById('code');
-      var copyBtn = document.getElementById('copy');
-      var ring = document.getElementById('ring');
-      var pctTxt = document.getElementById('pctTxt');
-      var doneTxt = document.getElementById('doneTxt');
-      var needTxt = document.getElementById('needTxt');
-      var certBtn = document.getElementById('certBtn');
-      var certStatus = document.getElementById('certStatus');
-      var serverEl = document.getElementById('server');
-      var resetLink = document.getElementById('reset');
+    // DOM refs
+    var grid       = document.getElementById('grid');
+    var codeInput  = document.getElementById('code');
+    var copyBtn    = document.getElementById('copy');
+    var ring       = document.getElementById('ring');
+    var pctTxt     = document.getElementById('pctTxt');
+    var doneTxt    = document.getElementById('doneTxt');
+    var needTxt    = document.getElementById('needTxt');
+    var certBtn    = document.getElementById('certBtn');
+    var certStatus = document.getElementById('certStatus');
+    var serverEl   = document.getElementById('server');
+    var resetLink  = document.getElementById('reset');
+    var backBtn    = document.getElementById('backBtn');
 
-      needTxt.textContent = NEED;
-      codeInput.value = state.code || '—';
-      serverEl.textContent = 'server: ' + (state.server || '—');
+    needTxt.textContent   = NEED;
+    codeInput.value       = state.code || '—';
+    serverEl.textContent  = 'server: ' + (state.server || '—');
 
-      // Render station tiles
-      function renderGrid(){
-        grid.innerHTML = '';
-        for (var i=0;i<STATIONS.length;i++){
-          var k = STATIONS[i];
-          var it = document.createElement('div'); it.className = 'tile';
-          var time = state.visit[k] && state.visit[k].ts ? formatTime(state.visit[k].ts) : '';
-          it.innerHTML = '<div class="k">'+k+'</div>'+
-                         '<div class="s">'+ (time? ('<span class="time ok">'+okIcon()+' '+time+'</span>') : 'ยังไม่เข้า') +'</div>';
-          (function(key){
-            it.addEventListener('click', function(){
-              toggleVisit(key);
-            });
-            it.addEventListener('contextmenu', function(e){ e.preventDefault(); clearVisit(key); });
-          })(k);
-          grid.appendChild(it);
-        }
+    // Render station tiles
+    function renderGrid(){
+      grid.innerHTML = '';
+      for (var i=0; i<STATIONS.length; i++){
+        var k  = STATIONS[i];
+        var it = document.createElement('div');
+        it.className = 'tile';
+        var time = state.visit[k] && state.visit[k].ts ? formatTime(state.visit[k].ts) : '';
+        it.innerHTML =
+          '<div class="k">'+k+'</div>' +
+          '<div class="s">' + (time ? ('<span class="time ok">'+okIcon()+' '+time+'</span>') : 'ยังไม่เข้า') + '</div>';
+        (function(key){
+          it.addEventListener('click', function(){ toggleVisit(key); });
+          it.addEventListener('contextmenu', function(e){ e.preventDefault(); clearVisit(key); });
+        })(k);
+        grid.appendChild(it);
       }
+    }
 
-      function okIcon(){
-        return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 7L10 17l-6-6" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-      }
+    function okIcon(){
+      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 7L10 17l-6-6" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    }
 
-      function toggleVisit(k){
-        if (state.visit[k] && state.visit[k].ts){ clearVisit(k); return; }
-        state.visit[k] = { ts: Date.now() };
-        saveState();
-        renderGrid();
-        updateProgress();
-      }
+    function toggleVisit(k){
+      if (state.visit[k] && state.visit[k].ts){ clearVisit(k); return; }
+      state.visit[k] = { ts: Date.now() };
+      saveState(); renderGrid(); updateProgress();
+    }
 
-      function clearVisit(k){
-        delete state.visit[k];
-        saveState();
-        renderGrid();
-        updateProgress();
-      }
+    function clearVisit(k){
+      delete state.visit[k];
+      saveState(); renderGrid(); updateProgress();
+    }
 
-      function formatTime(ts){
-        var d = new Date(ts);
-        var hh = String(d.getHours()).padStart(2,'0');
-        var mm = String(d.getMinutes()).padStart(2,'0');
-        return hh+':'+mm;
-      }
+    function formatTime(ts){
+      var d = new Date(ts);
+      var hh = String(d.getHours()).padStart(2,'0');
+      var mm = String(d.getMinutes()).padStart(2,'0');
+      return hh + ':' + mm;
+    }
 
-      function computeDone(){
-        var c = 0; for (var k in state.visit){ if (state.visit[k] && state.visit[k].ts) c++; }
-        return c;
-      }
+    function computeDone(){
+      var c = 0; for (var k in state.visit){ if (state.visit[k] && state.visit[k].ts) c++; }
+      return c;
+    }
 
-      function updateProgress(){
-        var done = computeDone();
-        var pct = Math.round((done / TOTAL) * 100);
-        ring.style.setProperty('--p', pct);
-        pctTxt.textContent = pct + '%';
-        doneTxt.textContent = done + '/' + TOTAL;
-        var ready = done >= NEED;
-        certBtn.disabled = !ready;
-        certStatus.textContent = ready ? 'พร้อมขอ' : 'ยังไม่พร้อม';
-      }
+    function updateProgress(){
+      var done = computeDone();
+      var pct  = Math.round((done / TOTAL) * 100);
+      ring.style.setProperty('--p', pct);
+      pctTxt.textContent = pct + '%';
+      doneTxt.textContent = done + '/' + TOTAL;
+      var ready = done >= NEED;
+      certBtn.disabled = !ready;
+      certStatus.textContent = ready ? 'พร้อมขอ' : 'ยังไม่พร้อม';
+    }
 
-      copyBtn.addEventListener('click', function(){
-        var txt = codeInput.value || '';
-        if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt); }
-        toast('คัดลอกแล้ว');
+    copyBtn.addEventListener('click', function(){
+      var txt = codeInput.value || '';
+      if (navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt); }
+      toast('คัดลอกแล้ว');
+    });
+
+    certBtn.addEventListener('click', function(){
+      if (certBtn.disabled) return;
+      toast('ส่งคำขอ Certificate แล้ว');
+      // TODO: เรียก API ฝั่งเซิร์ฟเวอร์ถ้าต้องการ
+    });
+
+    resetLink.addEventListener('click', function(e){
+      e.preventDefault();
+      state.visit = {};
+      saveState(); renderGrid(); updateProgress();
+    });
+
+    if (backBtn){
+      backBtn.addEventListener('click', function(e){
+        e.preventDefault();
+        try{
+          if (document.referrer && new URL(document.referrer).origin === location.origin){
+            history.back();
+          }else{
+            window.location.href = 'qr.html'; // เปลี่ยนปลายทางได้
+          }
+        }catch(err){ history.back(); }
       });
+    }
 
-      certBtn.addEventListener('click', function(){
-        if (certBtn.disabled) return;
-        toast('ส่งคำขอ Certificate แล้ว');
-        // TODO: call API ที่ server ของคุณถ้าต้องการ
-      });
+    function saveState(){ localStorage.setItem('stationState', JSON.stringify(state)); }
+    function loadState(){ try{ return JSON.parse(localStorage.getItem('stationState') || 'null'); } catch(e){ return null; } }
 
-      resetLink.addEventListener('click', function(e){ e.preventDefault(); state.visit = {}; saveState(); renderGrid(); updateProgress(); });
+    // First render
+    renderGrid();
+    updateProgress();
 
-      function saveState(){ localStorage.setItem('stationState', JSON.stringify(state)); }
-      function loadState(){ try{ return JSON.parse(localStorage.getItem('stationState')||'null'); }catch(e){ return null; } }
-
-      // first render
-      renderGrid();
-      updateProgress();
-
-      // Simple toast
-      function toast(msg){
-        var el = document.createElement('div');
-        el.textContent = msg; el.style.position='fixed'; el.style.left='50%'; el.style.bottom='24px'; el.style.transform='translateX(-50%)';
-        el.style.padding='10px 14px'; el.style.borderRadius='12px'; el.style.background='rgba(0,0,0,.85)'; el.style.color='#fff'; el.style.zIndex='9999';
-        document.body.appendChild(el); setTimeout(function(){ el.remove(); }, 1200);
-      }
-    })();
+    // Toast
+    function toast(msg){
+      var el = document.createElement('div');
+      el.textContent = msg;
+      el.style.position='fixed'; el.style.left='50%'; el.style.bottom='24px'; el.style.transform='translateX(-50%)';
+      el.style.padding='10px 14px'; el.style.borderRadius='12px'; el.style.background='rgba(0,0,0,.85)'; el.style.color='#fff'; el.style.zIndex='9999';
+      document.body.appendChild(el); setTimeout(function(){ el.remove(); }, 1200);
+    }
+  })();
   </script>
 </body>
 </html>
