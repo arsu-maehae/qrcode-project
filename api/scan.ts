@@ -1,2 +1,2 @@
-export { default, config } from '../back-end/api/scan.ts';
+export { default, config } from '../back-end/api/scan.js';
 

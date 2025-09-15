@@ -5,63 +5,11 @@
 // - หาก action='in' แล้วไม่มี session เปิดของ code นี้ → สร้าง session ใหม่ (started_at)
 // - หาก action='out' แล้วมี session เปิด → ปิด session (ตั้ง ended_at)
 
-import { getAdminClient, insertScanEvent, getOpenSession, createSession, closeSession } from '../shared/db.ts';
-import { preflight, json, badRequest, serverError, notFound } from '../shared/http.ts';
-import { isUUID, isBaseId, cleanDeviceId, cleanNote } from '../shared/validate.ts';
+import { getAdminClient, insertScanEvent, getOpenSession, createSession, closeSession } from '../shared/db.js';
+import { preflight, json, badRequest, serverError, notFound } from '../shared/http.js';
+import { isUUID, isBaseId, cleanDeviceId, cleanNote } from '../shared/validate.js';
 
 export const config = { runtime: 'edge' };
-
-function setCORS(req: any, res: any) {
-  try {
-    const origin = req.headers?.origin || '*';
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
-    res.setHeader('Access-Control-Allow-Methods', ALLOW_METHODS);
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Max-Age', '86400');
-  } catch {}
-}
-
-function envs(){
-  const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env as Record<string,string|undefined>;
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error('Supabase env not configured');
-  return { SUPABASE_URL: SUPABASE_URL.replace(/\/$/, ''), SUPABASE_SERVICE_ROLE_KEY };
-}
-
-function headersJSON(key: string){
-  return { 'apikey': key, 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
-}
-
-async function postScan(code: string, action: 'in'|'out', atISO: string, meta: any){
-  // unused with new helpers
-  return null as any;
-}
-
-async function getOpenSessionId(code: string){
-  const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = envs();
-  const url = `${SUPABASE_URL}/rest/v1/sessions?select=id&code=eq.${encodeURIComponent(code)}&ended_at=is.null&limit=1`;
-  const r = await fetch(url, { headers: { 'apikey': SUPABASE_SERVICE_ROLE_KEY, 'Authorization': `Bearer ${SUPABASE_SERVICE_ROLE_KEY}` } });
-  if (!r.ok) throw new Error(`get session failed: ${r.status}`);
-  const arr = await r.json();
-  return Array.isArray(arr) && arr[0]?.id ? arr[0].id : null;
-}
-
-async function createSession(code: string, startedAtISO: string, meta: any){
-  const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = envs();
-  const url = `${SUPABASE_URL}/rest/v1/sessions`;
-  const body = [{ code, started_at: startedAtISO, meta }];
-  const r = await fetch(url, { method:'POST', headers: headersJSON(SUPABASE_SERVICE_ROLE_KEY), body: JSON.stringify(body) });
-  if (!r.ok) throw new Error(`create session failed: ${r.status}`);
-  return r.json();
-}
-
-async function closeSession(id: number, endedISO: string){
-  const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = envs();
-  const url = `${SUPABASE_URL}/rest/v1/sessions?id=eq.${id}`;
-  const r = await fetch(url, { method:'PATCH', headers: headersJSON(SUPABASE_SERVICE_ROLE_KEY), body: JSON.stringify({ ended_at: endedISO }) });
-  if (!r.ok) throw new Error(`close session failed: ${r.status}`);
-  return r.json();
-}
 
 export default async function handler(req: Request): Promise<Response> {
   const pf = preflight(req); if (pf) return pf;
@@ -88,7 +36,9 @@ export default async function handler(req: Request): Promise<Response> {
     if (ebase && ebase.code !== 'PGRST116') throw ebase;
     if (!base) return notFound('base not found', req);
 
-    const meta = { ip: req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || null, ua: req.headers?.['user-agent'] || null };
+    const xfwd = req.headers instanceof Headers ? (req.headers.get('x-forwarded-for') || null) : (req as any).headers?.['x-forwarded-for'] || null;
+    const ua = req.headers instanceof Headers ? (req.headers.get('user-agent') || null) : (req as any).headers?.['user-agent'] || null;
+    const meta = { ip: xfwd, ua };
 
     // Determine direction if missing (toggle by open session)
     let open = await getOpenSession(uuidRaw, baseIdRaw);
