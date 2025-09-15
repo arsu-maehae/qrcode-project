@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open House QR Check-in — Dashboard</title>
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <span class="logo">QR</span>
+        <span class="title">Open House QR Check-in</span>
+      </div>
+      <nav class="tabs" role="navigation" aria-label="primary">
+        <a class="tab" href="index.html">สร้าง QR ของคุณ</a>
+        <a class="tab" href="checkin.html">เดโมเช็คอิน</a>
+        <a class="tab active" href="dashboard.html">Dashboard</a>
+      </nav>
+    </header>
+
+    <main class="views container">
+      <section class="view active">
+        <div class="card">
+          <h2>สรุปภาพรวม</h2>
+          <div class="toolbar">
+            <div class="meta">ผู้ใช้ทั้งหมด: <span id="total-users">-</span></div>
+            <div class="actions">
+              <button id="btn-refresh" class="btn primary">รีเฟรช</button>
+            </div>
+          </div>
+
+          <h3>คนที่ยังอยู่ในฐาน (สด)</h3>
+          <div class="table-wrap">
+            <table id="table-live" class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Base ID</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <h3>Sessions ล่าสุด</h3>
+          <div class="table-wrap">
+            <table id="table-latest" class="table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>UUID</th>
+                  <th>Display Name</th>
+                  <th>Base</th>
+                  <th>IN</th>
+                  <th>OUT</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span class="muted">Front-end only • localStorage prototype</span>
+    </footer>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/dashboard.js" defer></script>
+  </body>
+</html>
