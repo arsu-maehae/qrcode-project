@@ -1,17 +1,6 @@
-import type { VercelRequest, VercelResponse } from 'vercel';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-
-// CORS: allow GET only (+ preflight)
-function setCORS(req: VercelRequest, res: VercelResponse) {
-  try {
-    const origin = (req.headers?.origin as string) || '*';
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Max-Age', '86400');
-  } catch {}
-}
+import { applyCors, handlePreflight } from './_utils/cors.js';
 
 function getEnv() {
   const { SUPABASE_URL, SUPABASE_SERVICE_ROLE } = process.env as Record<string, string | undefined>;
@@ -22,13 +11,15 @@ function getEnv() {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  setCORS(req, res);
-
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
+  console.log('[summary] incoming request');
+  applyCors(req, res);
+  if (handlePreflight(req, res)) {
+    console.log('[summary] handled preflight');
+    return;
   }
   if (req.method !== 'GET') {
-    return res.status(405).json({ ok: false, error: 'Method not allowed' });
+    console.log('[summary] method not allowed', req.method);
+    return res.status(405).json({ ok: false, msg: 'Method not allowed' });
   }
 
   console.log('[summary] start');
@@ -42,26 +33,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const timer = setTimeout(() => {
     if (!finished) {
       console.log('[summary] timeout safeguard fired (8s)');
-      safeSend(500, { ok: false, error: 'timeout after 8s' });
+      safeSend(504, { ok: false, msg: 'gateway timeout after 8s' });
     }
   }, 8000);
 
   try {
+    console.log('[summary] reading env');
     const { url, service } = getEnv();
     console.log('[summary] env ok');
 
-    console.log('[summary] creating supabase client');
+    console.log('[summary] creating supabase admin client');
     const supa = createClient(url, service, { auth: { persistSession: false } });
 
-    console.log('[summary] querying counts');
+    console.log('[summary] querying counts (parallel, head-only)');
     console.time('[summary] users');
-    const pUsers = supa.from('users').select('uuid', { count: 'estimated', head: true });
+    const pUsers = supa.from('users').select('*', { count: 'exact', head: true });
     console.time('[summary] qrcodes');
-    const pQrcodes = supa.from('qrcodes').select('uuid', { count: 'estimated', head: true });
+    const pQrcodes = supa.from('qrcodes').select('*', { count: 'exact', head: true });
     console.time('[summary] scans');
-    const pScans = supa.from('scan_events').select('uuid', { count: 'estimated', head: true });
+    const pScans = supa.from('scan_events').select('*', { count: 'exact', head: true });
     console.time('[summary] sessions');
-    const pSessions = supa.from('sessions').select('session_id', { count: 'estimated', head: true });
+    const pSessions = supa.from('sessions').select('*', { count: 'exact', head: true });
 
     const [u, q, s, se] = await Promise.all([pUsers, pQrcodes, pScans, pSessions]);
     console.timeEnd('[summary] users');
@@ -81,11 +73,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       sessions: se.count ?? 0,
     };
 
-    console.log('[summary] success', totals);
-    return safeSend(200, { ok: true, totals });
+    console.log('[summary] success totals', totals);
+    return safeSend(200, { ok: true, totals, generatedAt: new Date().toISOString() });
   } catch (err: any) {
     console.log('[summary] error', err?.message || err);
-    return safeSend(500, { ok: false, error: err?.message || 'summary failed' });
+    return safeSend(500, { ok: false, msg: err?.message || 'summary failed' });
   }
 }
-
