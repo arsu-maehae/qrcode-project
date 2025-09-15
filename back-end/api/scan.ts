@@ -6,7 +6,7 @@
 // - หาก action='out' แล้วมี session เปิด → ปิด session (ตั้ง ended_at)
 
 import { getAdminClient, insertScanEvent, getOpenSession, createSession, closeSession } from '../shared/db.js';
-import { preflight, json, badRequest, serverError, notFound } from '../shared/http.js';
+import { preflight, json, badRequest, serverError, notFound, header } from '../shared/http.js';
 import { isUUID, isBaseId, cleanDeviceId, cleanNote } from '../shared/validate.js';
 
 export const config = { runtime: 'edge' };
@@ -36,8 +36,8 @@ export default async function handler(req: Request): Promise<Response> {
     if (ebase && ebase.code !== 'PGRST116') throw ebase;
     if (!base) return notFound('base not found', req);
 
-    const xfwd = req.headers instanceof Headers ? (req.headers.get('x-forwarded-for') || null) : (req as any).headers?.['x-forwarded-for'] || null;
-    const ua = req.headers instanceof Headers ? (req.headers.get('user-agent') || null) : (req as any).headers?.['user-agent'] || null;
+    const xfwd = header(req, 'x-forwarded-for');
+    const ua = header(req, 'user-agent');
     const meta = { ip: xfwd, ua };
 
     // Determine direction if missing (toggle by open session)
