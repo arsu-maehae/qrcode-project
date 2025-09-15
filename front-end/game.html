@@ -18,9 +18,27 @@
     a { color:#6ab7ff; }
     input[type="number"], input[type="range"] { background:#0b1220; color:#e6edf3; border:1px solid rgba(255,255,255,.15); border-radius:8px; padding:4px 6px; }
     label { opacity:.85; font-size:13px; }
+
+    /* Back button (fixed bottom-left) */
+    .back {
+      position: fixed; left: 12px; bottom: calc(16px + env(safe-area-inset-bottom));
+      z-index: 1000; display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border-radius: 12px; cursor: pointer; font-weight: 700;
+      background: rgba(255,255,255,.06); color: #e6edf3;
+      border: 1px solid rgba(255,255,255,.12); box-shadow: 0 6px 20px rgba(0,0,0,.35);
+    }
+    .back svg { opacity: .9 }
+    .back:active { transform: translateY(1px); }
   </style>
 </head>
 <body>
+
+  <!-- ปุ่มย้อนกลับ มุมซ้ายล่าง -->
+  <button id="backBtn" class="back" type="button" aria-label="ย้อนกลับ">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    ย้อนกลับ
+  </button>
+
   <div id="wrap">
     <canvas id="game" width="900" height="600" aria-label="QR Brick Breaker"></canvas>
     <div id="hud">
@@ -83,6 +101,24 @@
   const fileQR = document.getElementById('fileQR');
   const qrPreview = document.getElementById('qrPreview');
 
+  // Back button handler
+  const backBtn = document.getElementById('backBtn');
+  if (backBtn) {
+    backBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      try {
+        if (document.referrer && new URL(document.referrer).origin === location.origin) {
+          history.back();
+        } else {
+          // เปลี่ยนปลายทางได้ตามต้องการ
+          window.location.href = 'qr.html';
+        }
+      } catch (err) {
+        history.back();
+      }
+    });
+  }
+
   function fitCanvas() {
     const maxW = Math.min(window.innerWidth - 24, 1000);
     const maxH = Math.min(window.innerHeight - 260, 700);
@@ -107,7 +143,11 @@
     gridMeta: null, // {startX,startY,moduleSize,cols,rows,quietModules}
   };
 
-  inpScale.addEventListener('input', ()=>{ scaleVal.textContent = inpScale.value + '%'; state.gridScale = parseInt(inpScale.value,10)/100; rebuildFromCurrentMatrix(); });
+  inpScale.addEventListener('input', ()=>{
+    scaleVal.textContent = inpScale.value + '%';
+    state.gridScale = parseInt(inpScale.value,10)/100;
+    rebuildFromCurrentMatrix();
+  });
 
   // --- Matrix & build ---
   function brightness(r,g,b){ return 0.2126*r + 0.7152*g + 0.0722*b; }
@@ -139,26 +179,22 @@
 
   function buildBricksFromMatrix(mat, quietModules=4){
     const rows = mat.length, cols = mat[0].length;
-    const pad = 0; // tight blocks, no gaps
 
-    // Compute module size to fit width and keep height <= 50% canvas
-    const maxW = canvas.width - 16; // small side margin
+    // Compute module size (include quiet zone)
+    const maxW = canvas.width - 16;
     const maxH = Math.floor(canvas.height * 0.5);
-
-    // Include quiet zone in total size to guarantee scannability
     const totalCols = cols + quietModules*2;
     const totalRows = rows + quietModules*2;
 
     let moduleSize = Math.floor(Math.min(maxW / totalCols, maxH / totalRows));
-    moduleSize = Math.max(6, moduleSize); // keep it readable
+    moduleSize = Math.max(6, moduleSize);
 
     const gridW = totalCols * moduleSize;
     const gridH = totalRows * moduleSize;
-
     const startX = Math.floor((canvas.width - gridW)/2);
-    const startY = 48; // pin to top area
+    const startY = 48;
 
-    // Build bricks: draw quiet zone as white background, then modules
+    // build
     const bricks=[]; let id=1;
     for(let r=0;r<rows;r++){
       for(let c=0;c<cols;c++){
@@ -174,7 +210,11 @@
 
   // Keep a copy of the current matrix to rebuild on scale change
   let currentMatrix = null;
-  function rebuildFromCurrentMatrix(){ if(!currentMatrix) return; buildBricksFromMatrix(currentMatrix, state.gridMeta?state.gridMeta.quietModules:4); resetBall(true); state.running=false; }
+  function rebuildFromCurrentMatrix(){
+    if(!currentMatrix) return;
+    buildBricksFromMatrix(currentMatrix, state.gridMeta?state.gridMeta.quietModules:4);
+    resetBall(true); state.running=false;
+  }
 
   // --- Draw ---
   function drawQuietZone(){
@@ -191,25 +231,76 @@
     drawQuietZone();
     for(const br of state.bricks){ if(br.hp<=0) continue; ctx.fillStyle = br.type==='black'? (br.hp===1?'#222':'#000') : '#fff'; ctx.fillRect(br.x, br.y, br.w, br.h); }
   }
-  function drawUI(){ if(!state.running && state.ball.vx===0 && state.ball.vy===0){ ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.textAlign='center'; ctx.font='bold 24px ui-sans-serif, system-ui'; ctx.fillText('กด Space / แตะ เพื่อเริ่ม', canvas.width/2, canvas.height - 18); } }
+  function drawUI(){
+    if(!state.running && state.ball.vx===0 && state.ball.vy===0){
+      ctx.fillStyle='rgba(0,0,0,0.35)'; ctx.textAlign='center'; ctx.font='bold 24px ui-sans-serif, system-ui';
+      ctx.fillText('กด Space / แตะ เพื่อเริ่ม', canvas.width/2, canvas.height - 18);
+    }
+  }
 
   // --- Physics ---
-  function resetBall(onPaddle=true){ const p=state.paddle,b=state.ball; b.x=p.x; b.y=p.y - p.h/2 - b.r - 2; b.vx=0; b.vy=0; if(!onPaddle){ const angle = (-60 + Math.random()*120)*Math.PI/180; b.vx=Math.cos(angle)*b.speed; b.vy=Math.sin(angle)*b.speed; } }
+  function resetBall(onPaddle=true){
+    const p=state.paddle,b=state.ball;
+    b.x=p.x; b.y=p.y - p.h/2 - b.r - 2; b.vx=0; b.vy=0;
+    if(!onPaddle){
+      const angle = (-60 + Math.random()*120)*Math.PI/180;
+      b.vx=Math.cos(angle)*b.speed; b.vy=Math.sin(angle)*b.speed;
+    }
+  }
   function updateHud(){ scoreEl.textContent = state.score; levelEl.textContent = state.level; livesEl.textContent = state.lives; }
-  function newGame(){ state.level=1; state.score=0; state.lives=3; const mat = makeFallbackMatrix(state.modules); currentMatrix = mat; buildBricksFromMatrix(mat, 4); resetBall(true); state.running=false; updateHud(); }
+  function newGame(){
+    state.level=1; state.score=0; state.lives=3;
+    const mat = makeFallbackMatrix(state.modules);
+    currentMatrix = mat; buildBricksFromMatrix(mat, 4);
+    resetBall(true); state.running=false; updateHud();
+  }
 
-  function step(){ requestAnimationFrame(step); ctx.clearRect(0,0,canvas.width,canvas.height); const p=state.paddle,b=state.ball; if(b.vx===0&&b.vy===0){ b.x=p.x; b.y=p.y - p.h/2 - b.r - 2; }
-    b.x+=b.vx; b.y+=b.vy; if(b.x-b.r<0){ b.x=b.r; b.vx*=-1;} if(b.x+b.r>canvas.width){ b.x=canvas.width-b.r; b.vx*=-1;} if(b.y-b.r<0){ b.y=b.r; b.vy*=-1; }
-    if(b.y - b.r > canvas.height){ state.lives--; updateHud(); if(state.lives<=0){ state.level=1; state.score=0; state.lives=3; } resetBall(true); state.running=false; }
-    if(b.y+b.r>=p.y-p.h/2 && b.y-b.r<=p.y+p.h/2 && b.x>=p.x-p.w/2 && b.x<=p.x+p.w/2 && b.vy>0){ const hitPos=(b.x-p.x)/(p.w/2); const angle=hitPos*(Math.PI/3); const speed=Math.hypot(b.vx,b.vy)*1.02; b.vx=Math.sin(angle)*speed; b.vy=-Math.cos(angle)*speed; b.y=p.y - p.h/2 - b.r - 1; }
-    for(const br of state.bricks){ if(br.hp<=0) continue; if(circleRectOverlap(b.x,b.y,b.r,br.x,br.y,br.w,br.h)){ // reflect axis of penetration
-        const dxL=Math.abs((br.x) - (b.x + b.r)); const dxR=Math.abs((b.x - b.r) - (br.x + br.w)); const dyT=Math.abs((br.y) - (b.y + b.r)); const dyB=Math.abs((b.y - b.r) - (br.y + br.h)); const minPen=Math.min(dxL,dxR,dyT,dyB); if(minPen===dxL||minPen===dxR) b.vx*=-1; else b.vy*=-1; br.hp -= 1; state.score += (br.type==='black'?20:10); updateHud(); } }
-    drawBricks(); drawPaddle(); drawBall(); drawUI(); }
+  function step(){
+    requestAnimationFrame(step);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const p=state.paddle,b=state.ball;
+    if(b.vx===0&&b.vy===0){ b.x=p.x; b.y=p.y - p.h/2 - b.r - 2; }
+    b.x+=b.vx; b.y+=b.vy;
+    if(b.x-b.r<0){ b.x=b.r; b.vx*=-1;}
+    if(b.x+b.r>canvas.width){ b.x=canvas.width-b.r; b.vx*=-1;}
+    if(b.y-b.r<0){ b.y=b.r; b.vy*=-1; }
+    if(b.y - b.r > canvas.height){
+      state.lives--; updateHud();
+      if(state.lives<=0){ state.level=1; state.score=0; state.lives=3; }
+      resetBall(true); state.running=false;
+    }
+    if(b.y+b.r>=p.y-p.h/2 && b.y-b.r<=p.y+p.h/2 && b.x>=p.x-p.w/2 && b.x<=p.x+p.w/2 && b.vy>0){
+      const hitPos=(b.x-p.x)/(p.w/2); const angle=hitPos*(Math.PI/3);
+      const speed=Math.hypot(b.vx,b.vy)*1.02;
+      b.vx=Math.sin(angle)*speed; b.vy=-Math.cos(angle)*speed; b.y=p.y - p.h/2 - b.r - 1;
+    }
+    for(const br of state.bricks){
+      if(br.hp<=0) continue;
+      if(circleRectOverlap(b.x,b.y,b.r,br.x,br.y,br.w,br.h)){
+        const dxL=Math.abs((br.x) - (b.x + b.r));
+        const dxR=Math.abs((b.x - b.r) - (br.x + br.w));
+        const dyT=Math.abs((br.y) - (b.y + b.r));
+        const dyB=Math.abs((b.y - b.r) - (br.y + br.h));
+        const minPen=Math.min(dxL,dxR,dyT,dyB);
+        if(minPen===dxL||minPen===dxR) b.vx*=-1; else b.vy*=-1;
+        br.hp -= 1; state.score += (br.type==='black'?20:10); updateHud();
+      }
+    }
+    drawBricks(); drawPaddle(); drawBall(); drawUI();
+  }
 
-  function circleRectOverlap(cx,cy,r,rx,ry,rw,rh){ const nx=Math.max(rx,Math.min(cx,rx+rw)); const ny=Math.max(ry,Math.min(cy,ry+rh)); const dx=cx-nx, dy=cy-ny; return dx*dx+dy*dy<=r*r; }
+  function circleRectOverlap(cx,cy,r,rx,ry,rw,rh){
+    const nx=Math.max(rx,Math.min(cx,rx+rw)); const ny=Math.max(ry,Math.min(cy,ry+rh));
+    const dx=cx-nx, dy=cy-ny; return dx*dx+dy*dy<=r*r;
+  }
 
   // Controls
-  function movePaddle(dirOrX){ const p=state.paddle; if(typeof dirOrX==='number' && Math.abs(dirOrX)<=1){ p.x += dirOrX * p.speed * 2.2; } else if(typeof dirOrX==='number'){ p.x = dirOrX; } p.x=Math.max(p.w/2,Math.min(canvas.width-p.w/2,p.x)); }
+  function movePaddle(dirOrX){
+    const p=state.paddle;
+    if(typeof dirOrX==='number' && Math.abs(dirOrX)<=1){ p.x += dirOrX * p.speed * 2.2; }
+    else if(typeof dirOrX==='number'){ p.x = dirOrX; }
+    p.x=Math.max(p.w/2,Math.min(canvas.width-p.w/2,p.x));
+  }
   addEventListener('keydown', (e)=>{ if(e.key==='ArrowLeft') movePaddle(-1); if(e.key==='ArrowRight') movePaddle(1); if(e.key===' ') launch(); });
   canvas.addEventListener('mousemove',(e)=>{ const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width; movePaddle((e.clientX-rect.left)*scaleX); });
   canvas.addEventListener('touchmove',(e)=>{ const t=e.touches[0]; if(!t) return; const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width; movePaddle((t.clientX-rect.left)*scaleX); e.preventDefault(); }, {passive:false});
@@ -218,17 +309,19 @@
   function launch(){ if(state.running) return; state.running=true; resetBall(false); }
   btnStart.addEventListener('click', ()=>{ newGame(); });
 
-  // Fallback QR-style (not scannable) for startup only
+  // Fallback QR-like matrix (startup only)
   function makeFallbackMatrix(N=21){
     const M = Array.from({length:N},()=>Array(N).fill(0));
     function finder(r0,c0){ for(let r=0;r<7;r++)for(let c=0;c<7;c++){ const edge = r===0||c===0||r===6||c===6|| (r>=2&&r<=4&&c>=2&&c<=4); M[r0+r][c0+c] = edge?1:0; } }
     finder(0,0); finder(0,N-7); finder(N-7,0);
     for(let r=0;r<N;r++) for(let c=0;c<N;c++){
-      const inFinder = (r<7&&c<7)||(r<7&&c>=N-7)||(r>=N-7&&c<7); if(inFinder) continue; M[r][c] = Math.random()<0.45?1:0; }
+      const inFinder = (r<7&&c<7)||(r<7&&c>=N-7)||(r>=N-7&&c<7); if(inFinder) continue;
+      M[r][c] = Math.random()<0.45?1:0;
+    }
     return M;
   }
 
-  // Rebuild from upload & show scannable preview image
+  // Build from upload & show preview
   btnBuild.addEventListener('click', async ()=>{
     state.modules = Math.max(17, Math.min(177, parseInt(inpModules.value||'21',10)));
     const qMods = Math.max(0, Math.min(16, parseInt(inpQuietModules.value||'4',10)));
@@ -236,16 +329,30 @@
 
     let img = null;
     const file = fileQR.files && fileQR.files[0];
-    if(file){ if(state.lastQRObjectURL){ URL.revokeObjectURL(state.lastQRObjectURL); state.lastQRObjectURL=null; } const url = URL.createObjectURL(file); state.lastQRObjectURL = url; qrPreview.src = url; img = await loadImage(url); }
+    if(file){
+      if(state.lastQRObjectURL){ URL.revokeObjectURL(state.lastQRObjectURL); state.lastQRObjectURL=null; }
+      const url = URL.createObjectURL(file);
+      state.lastQRObjectURL = url; qrPreview.src = url; img = await loadImage(url);
+    }
 
-    if(!img){ qrPreview.removeAttribute('src'); const mat = makeFallbackMatrix(state.modules); currentMatrix = mat; buildBricksFromMatrix(mat, qMods); resetBall(true); state.running=false; updateHud(); return; }
+    if(!img){
+      qrPreview.removeAttribute('src');
+      const mat = makeFallbackMatrix(state.modules);
+      currentMatrix = mat; buildBricksFromMatrix(mat, qMods);
+      resetBall(true); state.running=false; updateHud(); return;
+    }
 
-    const quietPxGuess = 0; // we sample whole image and rely on threshold; ifภาพมีขอบเงียบ ให้ระบุค่านี้ในรูปเอง
+    const quietPxGuess = 0;
     const mat = await imageToMatrix(img, state.modules, quietPxGuess, thresh);
-    currentMatrix = mat; buildBricksFromMatrix(mat, qMods); resetBall(true); state.running=false; updateHud();
+    currentMatrix = mat; buildBricksFromMatrix(mat, qMods);
+    resetBall(true); state.running=false; updateHud();
   });
 
-  function loadImage(url){ return new Promise((resolve)=>{ const img=new Image(); img.onload=()=>resolve(img); img.src = url; img.crossOrigin='anonymous'; }); }
+  function loadImage(url){
+    return new Promise((resolve)=>{
+      const img=new Image(); img.onload=()=>resolve(img); img.src = url; img.crossOrigin='anonymous';
+    });
+  }
 
   // Init
   newGame();
