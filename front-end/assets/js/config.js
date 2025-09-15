@@ -3,7 +3,7 @@
 (function(){
   try {
     window.APP_NAME = 'Open House QR Check-in';
-    window.API_BASE = window.API_BASE || '';
+    window.API_BASE = "https://qrcode-project-self.vercel.app";
     // Build API URL compatible with either API_BASE = 'https://host' or 'https://host/api'
     window.apiUrl = function(path){
       try{
