@@ -4,10 +4,10 @@
 // - ถ้าไม่ส่ง code มา จะสุ่ม 8 ตัวอักษร [A-Z0-9]
 // Response: { ok: true, code, data }
 
-import { sign as hmacSign } from '../shared/hmac.ts';
-import { getAdminClient } from '../shared/db.ts';
-import { cleanNote } from '../shared/validate.ts';
-import { preflight, json, badRequest, serverError } from '../shared/http.ts';
+import { sign as hmacSign } from '../shared/hmac.js';
+import { getAdminClient } from '../shared/db.js';
+import { cleanNote } from '../shared/validate.js';
+import { preflight, json, badRequest, serverError } from '../shared/http.js';
 
 export const config = { runtime: 'edge' };
 

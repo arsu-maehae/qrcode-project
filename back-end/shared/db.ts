@@ -1,6 +1,6 @@
 // Supabase helpers using @supabase/supabase-js
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-import type { ScanAction, SummaryRow } from './types';
+import type { ScanAction, SummaryRow } from './types.js';
 
 function envs() {
   const { SUPABASE_URL, SUPABASE_SERVICE_ROLE, SUPABASE_ANON_KEY } = process.env as Record<string, string | undefined>;

@@ -20,8 +20,8 @@ function envs(){
   return { SUPABASE_URL: SUPABASE_URL.replace(/\/$/, ''), SUPABASE_SERVICE_ROLE_KEY };
 }
 
-import { getAdminClient } from '../shared/db.ts';
-import { preflight, json, serverError } from '../shared/http.ts';
+import { getAdminClient } from '../shared/db.js';
+import { preflight, json, serverError } from '../shared/http.js';
 
 export const config = { runtime: 'edge' };
 
@@ -30,7 +30,10 @@ export default async function handler(req: Request): Promise<Response> {
   if (req.method !== 'GET') return json({ error: 'Method not allowed' }, req, 405);
   try {
     const supa = getAdminClient();
-    const limit = Math.min(Math.max(Number(req.query?.limit || 50), 1), 200);
+    const url = new URL(req.url);
+    const limitParam = url.searchParams.get('limit');
+    const limitNum = limitParam ? Number(limitParam) : 50;
+    const limit = Math.min(Math.max(Number.isFinite(limitNum) ? limitNum : 50, 1), 200);
 
     // totals.users
     const { count: totalUsers, error: eUsers } = await supa.from('users').select('uuid', { count: 'exact', head: true });
