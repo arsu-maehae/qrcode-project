@@ -7,7 +7,7 @@
 import { sign as hmacSign } from '../shared/hmac.js';
 import { getAdminClient } from '../shared/db.js';
 import { cleanNote } from '../shared/validate.js';
-import { preflight, json, badRequest, serverError } from '../shared/http.js';
+import { preflight, json, badRequest, serverError, header } from '../shared/http.js';
 
 export const config = { runtime: 'edge' };
 
@@ -71,7 +71,7 @@ export default async function handler(req: Request): Promise<Response> {
     }
 
     // 5) qrUrl = `${ORIGIN or FRONTEND_BASE}/p?id=${uuid}&sig=${sig}`
-    const origin = process.env.FRONTEND_BASE || req.headers.get('origin') || '';
+    const origin = process.env.FRONTEND_BASE || header(req, 'origin') || '';
     const base = origin || (process.env.FRONTEND_BASE || '');
     const qrUrl = base ? `${String(base).replace(/\/$/, '')}/p?id=${encodeURIComponent(userUuid)}&sig=${encodeURIComponent(sig)}` : '';
     return json({ ok: true, uuid: userUuid, sig, qrUrl, issued_at }, req, 200);
