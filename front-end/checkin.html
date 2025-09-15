@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open House QR Check-in — เดโมเช็คอิน</title>
+    <link rel="stylesheet" href="./assets/css/style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <span class="logo">QR</span>
+        <span class="title">Open House QR Check-in</span>
+      </div>
+      <nav class="tabs" role="navigation" aria-label="primary">
+        <a class="tab" href="index.html">สร้าง QR ของคุณ</a>
+        <a class="tab active" href="checkin.html">เดโมเช็คอิน</a>
+      </nav>
+    </header>
+
+    <main class="views container">
+      <section class="view active">
+        <div class="card">
+          <h2>เดโมเช็คอิน (กรอกมือ)</h2>
+          <div class="field">
+            <label for="uuid-input">UUID</label>
+            <input id="uuid-input" type="text" placeholder="วาง UUID ที่ได้จาก QR" />
+          </div>
+          <div class="field">
+            <label for="base-input">Base ID (เช่น main_gate)</label>
+            <input id="base-input" type="text" placeholder="base id (A-Z,0-9,_,-)" />
+          </div>
+          <div class="field">
+            <label for="device-input">Device ID (ถ้ามี)</label>
+            <input id="device-input" type="text" placeholder="device-01" />
+          </div>
+          <div class="card" style="margin-top:1rem">
+            <h3>สแกนด้วยกล้อง (ทางเลือก)</h3>
+            <div class="actions">
+              <button id="btn-start-scan" class="btn">เริ่มสแกน</button>
+              <button id="btn-stop-scan" class="btn ghost">หยุดสแกน</button>
+              <span id="scan-status" class="meta">พร้อม</span>
+            </div>
+            <video id="video" playsinline style="width:100%;max-width:420px;border:1px solid var(--border);border-radius:.6rem"></video>
+            <canvas id="scan-canvas" width="420" height="320" hidden></canvas>
+          </div>
+          <div class="actions">
+            <button id="btn-checkin" class="btn primary">เช็คอิน (IN)</button>
+            <button id="btn-checkout" class="btn ghost">เช็คเอาท์ (OUT)</button>
+            <button id="btn-toggle" class="btn">Toggle</button>
+            <button id="btn-clear" class="btn ghost">ลบรายการทั้งหมด (Local)</button>
+          </div>
+          <div id="checkin-result" class="card" style="margin-top:1rem"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span class="muted">Front-end only • localStorage prototype</span>
+    </footer>
+
+    <script src="assets/js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="assets/js/storage.js"></script>
+    <script src="assets/js/checkin.js" defer></script>
+  </body>
+</html>

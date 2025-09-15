@@ -1,13 +1,50 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>hello world</h1>
-    <h2>hello sun</h2>
-    <h1>Hello Arsu1010</h1>
-</body>
+<html lang="th">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Open House QR Check-in</title>
+    <link rel="stylesheet" href="./assets/css/style.css" />
+    <script src="assets/js/config.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <span class="logo">QR</span>
+        <span class="title">Open House QR Check-in</span>
+      </div>
+      <nav class="tabs" role="navigation" aria-label="primary">
+        <a class="tab active" href="index.html">สร้าง QR ของคุณ</a>
+        <a class="tab" href="checkin.html">เดโมเช็คอิน</a>
+      </nav>
+    </header>
+
+    <main class="views container">
+      <section class="view active">
+        <div class="card">
+          <h2>การดสร้าง QR Code ของคุณ</h2>
+          <div class="field">
+            <label for="name-input">ชื่อที่แสดง (Display Name)</label>
+            <input id="name-input" type="text" placeholder="เช่น Alice" />
+          </div>
+          <div class="field">
+            <label for="email-input">อีเมล (ใช้ idempotent)</label>
+            <input id="email-input" type="text" placeholder="เช่น alice@example.com" />
+          </div>
+          <div class="actions">
+            <button id="btn-generate" class="btn primary">สร้าง QR Code</button>
+          </div>
+          <div id="qr-preview" class="qr-frame" aria-live="polite" aria-label="ตัวอย่าง QR"></div>
+          <p id="qr-info" class="meta muted"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <span class="muted">Front-end only • localStorage prototype</span>
+    </footer>
+
+    <script src="assets/js/index.js" defer></script>
+  </body>
 </html>
