@@ -1,16 +1,10 @@
 -- RLS — enable on all phase-2 tables (policies can be added as needed)
 -- Assumes tables are created by supabase/schema.sql
 
-alter table if exists public.users enable row level security;
-alter table if exists public.qrcodes enable row level security;
-alter table if exists public.bases enable row level security;
-alter table if exists public.scan_events enable row level security;
-alter table if exists public.sessions enable row level security;
+-- Minimal: only qr_generations is used
+alter table if exists public.qr_generations enable row level security;
 
--- Minimal public read access: allow anon SELECT only on scan_events
-drop policy if exists anon_select_scan_events on public.scan_events;
-create policy anon_select_scan_events on public.scan_events
-  for select using (true);
+-- No anon access for qr_generations (service role via API bypasses RLS)
 
 -- Note:
 -- - Other tables (users, qrcodes, bases, sessions) remain non-readable for anon.

@@ -1,5 +1,6 @@
 // Minimal Supabase PostgREST client using fetch, no dependencies
-const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
+const { SUPABASE_URL } = process.env;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE;
 
 function baseHeaders() {
   return {
@@ -45,5 +46,15 @@ export async function listStats(limit = 500) {
     map.set(s.code, curr);
   }
   return Array.from(map.values()).sort((a,b)=> new Date(b.createdAt||b.checkinAt||b.checkoutAt||0) - new Date(a.createdAt||a.checkinAt||a.checkoutAt||0));
+}
+
+// Upsert QR generation records { uuid, generated_at }
+export async function upsertQrGeneration(uuid, generatedAtISO) {
+  const headers = { ...baseHeaders(), Prefer: 'return=representation,resolution=merge-duplicates' };
+  const body = [{ uuid, generated_at: generatedAtISO }];
+  const r = await fetch(rest('/qr_generations'), { method: 'POST', headers, body: JSON.stringify(body) });
+  if (!r.ok) throw new Error(`upsertQrGeneration failed: ${r.status}`);
+  const json = await r.json();
+  return json?.[0] || null;
 }
 
