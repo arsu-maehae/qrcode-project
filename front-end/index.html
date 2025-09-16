@@ -14,7 +14,7 @@
     main.center{min-height:100dvh; padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 96px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;}
     .title{font-weight:800; letter-spacing:.2px; text-align:center; margin:0 0 6px;}
     .size{color:var(--muted); font-weight:700; letter-spacing:.2px; text-align:center;}
-    .qr-box{display:flex; align-items:center; justify-content:center; background:var(--card); padding:18px; border-radius:22px; box-shadow:var(--shadow);}
+    .qr-box{display:flex; align-items:center; justify-content:center; background:var(--card); padding:18px; border-radius:22px; box-shadow:var(--shadow); min-height: calc(min(78vw, 360px) + 36px);}
     img.qr{ width:min(78vw, 360px); height:auto; aspect-ratio:1/1; border-radius:16px; background:#fff; display:block; }
     .uuid{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.95rem; color:var(--muted); word-break:break-all; text-align:center;}
     .btns{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; width:min(92vw, 440px);}
@@ -22,8 +22,9 @@
     .btn-dark{background:#111827;}
     .btn-good{background:#16a34a;}
     .btn-float-right{position:fixed; top:calc(10px + env(safe-area-inset-top)); right:12px; z-index:1000; background:#0ea5e9;}
-    .btn-play{position:fixed; bottom:calc(16px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:min(92vw, 440px); z-index:1000; background:#22c55e; font-size:1.05rem;}
+    .btn-play{position:fixed; bottom:calc(16px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:min(92vw, 440px); z-index:1000; background:#22c55e; font-size:1.05rem; text-align:center; text-decoration:none; padding:10px 14px; border-radius:14px; color:#fff; font-weight:800;}
     .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); padding:10px 14px; border-radius:12px; background:rgba(0,0,0,.85); color:#fff; z-index:9999;}
+    .hidden{display:none !important;}
   </style>
 </head>
 <body>
@@ -32,6 +33,7 @@
    style="display:inline-block;text-decoration:none;padding:10px 14px;border-radius:14px;background:#0ea5e9;color:#fff;font-weight:800;">
   ฐานการเรียนรู้
 </a>
+
 
   <main class="center">
     <h1 class="title">คิวอาร์โค้ด</h1>
@@ -48,21 +50,18 @@
 
     <!-- ปุ่มสามปุ่มตรงกลางใต้ QR -->
     <div class="btns">
-      <button id="btnGen">สุ่มคิวอา</button>
-      <button id="btnSave" class="btn-good">บันทึกรูปคิวอา</button>
-      <button id="btnCopy" class="btn-dark">คัดลอกรหัส</button>
+      <center><button id="btnGen">สุ่มคิวอา </button></center>
+      <button id="btnSave" class="btn-good hidden">บันทึกรูปคิวอา</button>
+      <button id="btnCopy" class="btn-dark hidden">คัดลอกรหัส</button> 
     </div>
   </main>
 
   <!-- ปุ่มเล่นเกม กลางล่าง -->
-  
-  <a href="game.html" class="btn-play" style="display:inline-block;text-align:center;text-decoration:none;
-  padding:10px 14px;border-radius:14px;background:#0fb647;color:#fff;font-weight:800;">
-  เล่นเกม
-</a>
+  <a id="btnPlay" href="game.html" class="btn-play">เล่นเกม</a>
 
   <script>
   (function(){
+    // ====== Elements ======
     var img = document.getElementById('qrImg');
     var sizeLabel = document.getElementById('sizeLabel');
     var uuidText = document.getElementById('uuidText');
@@ -72,8 +71,25 @@
     var btnTask = document.getElementById('btnTask');
     var btnPlay = document.getElementById('btnPlay');
 
-    // ขนาดไฟล์ QR (px) ที่จะสร้างจริง ๆ
-    var QR_PX = 1024; // ปรับได้ เช่น 256 / 512 / 1024
+    // ====== Config ======
+    var QR_PX = 1024; // ขนาดไฟล์ PNG ของ QR
+    var STORAGE_KEY = 'qr_locked_code_v1'; // เก็บรหัสที่ล็อคต่อเครื่อง
+
+    // ====== Utils ======
+    function toast(msg){
+      var el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = msg;
+      document.body.appendChild(el);
+      setTimeout(function(){ el.remove(); }, 1400);
+    }
+
+    function storageGet(){
+      try{ return localStorage.getItem(STORAGE_KEY) || ''; }catch(e){ return ''; }
+    }
+    function storageSet(v){
+      try{ localStorage.setItem(STORAGE_KEY, v); }catch(e){}
+    }
 
     // รหัสสั้นจริง (ไม่ใช่แค่แสดง) — ใช้ตัวอักษรอ่านง่าย (ไม่มี I/O)
     function shortId(len){
@@ -87,7 +103,7 @@
 
     // อัปเดต "ขนาด: W×H px" จากขนาดไฟล์จริง
     function updateSizeLabel(){
-      if (img.naturalWidth) {
+      if (img && img.naturalWidth) {
         sizeLabel.textContent = 'ขนาด: ' + img.naturalWidth + '×' + img.naturalHeight + ' px';
       } else {
         sizeLabel.textContent = 'ขนาด: ' + QR_PX + '×' + QR_PX + ' px';
@@ -101,21 +117,33 @@
       sizeLabel.textContent = 'ขนาด: ' + QR_PX + '×' + QR_PX + ' px';
     }
 
-    function toast(msg){
-      var el = document.createElement('div');
-      el.className = 'toast';
-      el.textContent = msg;
-      document.body.appendChild(el);
-      setTimeout(function(){ el.remove(); }, 1200);
-    }
-
-    function generate(){
-      var code = shortId(12);           // เปลี่ยนความยาวได้ เช่น 8/10/16
+    // เปลี่ยน UI เป็นสถานะ "ล็อคแล้ว"
+    function applyLockedUI(code){
+      if (!code) return;
       uuidText.textContent = code;
       drawQR(code);
+      // ซ่อนปุ่มสุ่ม / โชว์ปุ่มใช้งาน
+      btnGen.classList.add('hidden');
+      btnSave.classList.remove('hidden');
+      btnCopy.classList.remove('hidden');
     }
 
-    // ดาวน์โหลด PNG อัตโนมัติ (fetch -> blob -> a.download)
+    // ====== Actions ======
+    function handleGenerateOnce(){
+      // ถ้ามีของเดิมอยู่แล้ว ให้ล็อคไว้และไม่อนุญาตสุ่มใหม่
+      var existed = storageGet();
+      if (existed) {
+        applyLockedUI(existed);
+        toast('คิวอาถูกล็อคไว้แล้ว');
+        return;
+      }
+      // ยังไม่เคยมี => สุ่มครั้งแรก แล้ว "ล็อค"
+      var code = shortId(12); // ปรับความยาวได้ เช่น 8/10/16
+      storageSet(code);
+      applyLockedUI(code);
+      toast('สร้างและล็อคคิวอาแล้ว');
+    }
+
     async function savePNG(){
       try{
         if(!img || !img.src){ toast('ยังไม่มีภาพ QR'); return; }
@@ -140,6 +168,7 @@
 
     function copyCode(){
       var txt = uuidText.textContent || '';
+      if(!txt){ toast('ยังไม่มีรหัส'); return; }
       if (navigator.clipboard && navigator.clipboard.writeText){
         navigator.clipboard.writeText(txt);
       }else{
@@ -149,17 +178,35 @@
       toast('คัดลอกแล้ว');
     }
 
-    // Events
-    img.addEventListener('load', updateSizeLabel);
-    btnGen.addEventListener('click', generate);
-    btnSave.addEventListener('click', savePNG);
-    btnCopy.addEventListener('click', copyCode);
-    img.addEventListener('click', generate);
-    btnTask.addEventListener('click', function(){ toast('เปิดฐานการเรียนรู้'); });
-    btnPlay.addEventListener('click', function(){ toast('เริ่มเล่นเกม'); });
+    // ====== Events ======
+    img && img.addEventListener('load', updateSizeLabel);
+    btnGen && btnGen.addEventListener('click', handleGenerateOnce);
+    btnSave && btnSave.addEventListener('click', savePNG);
+    btnCopy && btnCopy.addEventListener('click', copyCode);
 
-    // First run
-    generate();
+    // ป้องกันการสุ่มซ้ำจากการคลิกรูป
+    img && img.addEventListener('click', function(){
+      if (storageGet()){
+        toast('คิวอาถูกล็อคแล้ว');
+      } else {
+        toast('กด "สุ่มคิวอา" เพื่อสร้าง');
+      }
+    });
+
+    btnTask && btnTask.addEventListener('click', function(){ /* optional toast */ });
+    btnPlay && btnPlay.addEventListener('click', function(){ /* optional toast */ });
+
+    // ====== First load ======
+    // ถ้าเคยล็อคแล้ว ให้แสดง QR เดิมและซ่อนปุ่มสุ่ม
+    var locked = storageGet();
+    if (locked){
+      applyLockedUI(locked);
+    } else {
+      // ครั้งแรก: แสดงแค่ปุ่มสุ่ม (ปุ่มอื่นถูกซ่อนไว้แล้วด้วย .hidden)
+      uuidText.textContent = '—';
+      img.removeAttribute('src'); // รอจนกว่าจะสุ่ม
+      updateSizeLabel();
+    }
   })();
   </script>
 </body>
