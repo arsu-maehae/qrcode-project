@@ -1,2 +1,1 @@
-export { default } from '../back-end/api/stats.js';
-
+export { default } from './qr/list.js';

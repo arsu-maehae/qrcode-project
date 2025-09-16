@@ -1,2 +1,2 @@
-export { default, config } from '../back-end/api/issue.js';
+export { default, config } from '../back-end/api/issue.ts';
 
