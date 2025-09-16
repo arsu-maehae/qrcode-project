@@ -19,14 +19,21 @@
       color:var(--fg) !important;
       font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
     }
-    #wrap{ min-height:100vh; display:flex; flex-direction:column; align-items:center; gap:12px; padding:12px 8px calc(90px + env(safe-area-inset-bottom)); }
-    canvas{ background:var(--card); border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.08), inset 0 0 0 1px rgba(0,0,0,.04); touch-action:none; }
+    #wrap{
+      min-height:100vh; display:flex; flex-direction:column; align-items:center; gap:12px;
+      padding:12px 8px calc(90px + env(safe-area-inset-bottom));
+    }
+    canvas{
+      background:var(--card); border-radius:16px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08), inset 0 0 0 1px rgba(0,0,0,.04);
+      touch-action:none;
+    }
 
+    /* HUD กลางเสมอ + High Score */
     #hud{ display:flex; gap:10px; align-items:center; justify-content:center; font-weight:600; flex-wrap:wrap; }
     .pill{ padding:6px 10px; border-radius:999px; background:#f3f4f6; border:1px solid var(--bd); }
-    #btnStart{ cursor:pointer; border:none; color:white; padding:8px 14px; border-radius:10px; font-weight:700; background:var(--blue); }
 
-    /* controls: เหลือเฉพาะ UUID */
+    /* controls: เหลือเฉพาะ UUID กลาง */
     #controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; align-items:center; }
 
     .back-fixed{
@@ -35,6 +42,22 @@
       border:1px solid var(--bd); background:rgba(0,0,0,.04); color:var(--fg); font-weight:700; cursor:pointer;
     }
     .back-fixed svg{ opacity:.9 }
+
+    /* ปุ่ม Restart กลางหน้าจอเมื่อจบเกม */
+    #overlay{
+      position:absolute; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column;
+    }
+    #overlay.show{ display:flex; }
+    #overlay .card{
+      background:rgba(0,0,0,0.5); color:#fff; padding:16px 18px; border-radius:14px; text-align:center;
+      min-width: 220px;
+    }
+    #btnRestart{
+      margin-top:12px; background:var(--blue); color:#fff; border:none; border-radius:10px; font-weight:700; padding:10px 16px; cursor:pointer;
+    }
+
+    /* layout wrapper สำหรับ canvas + overlay ให้ซ้อนกันได้ */
+    .stage{ position:relative; display:inline-block; }
   </style>
 </head>
 <body>
@@ -46,17 +69,26 @@
   </button>
 
   <div id="wrap">
-    <!-- Mobile-first 360x640 -->
-    <canvas id="game" width="360" height="640" aria-label="Q-ARE-Code breaker?"></canvas>
-
+    <!-- HUD บน: รวม High Score กลางเสมอ -->
     <div id="hud">
+      <div class="pill">High Score: <span id="hiscore">0</span></div>
       <div class="pill">คะแนน: <span id="score">0</span></div>
       <div class="pill">เวลา: <span id="time">30.0</span>s</div>
       <div class="pill">ชีวิต: <span id="lives">1</span></div>
-      <button id="btnStart">เริ่ม / รีเซ็ต</button>
     </div>
 
-    <!-- เหลือเฉพาะ UUID ด้านล่าง -->
+    <!-- เวทีเกม: ซ้อน overlay ทับ canvas -->
+    <div class="stage">
+      <canvas id="game" width="360" height="640" aria-label="Q-ARE-Code breaker?"></canvas>
+      <div id="overlay">
+        <div class="card">
+          <div id="gameOverText" style="font-weight:800; font-size:20px; margin-bottom:6px;">Game Over • Score: 0</div>
+          <button id="btnRestart">Restart</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ด้านล่าง: เหลือเฉพาะ UUID กลาง -->
     <div id="controls">
       <div class="pill"><b>UUID12:</b> <code id="uuidText" style="font-weight:700"></code></div>
     </div>
@@ -70,23 +102,28 @@
   const scoreEl=document.getElementById('score');
   const timeEl=document.getElementById('time');
   const livesEl=document.getElementById('lives');
-  const btnStart=document.getElementById('btnStart');
+  const hiscoreEl=document.getElementById('hiscore');
   const uuidText=document.getElementById('uuidText');
 
+  const overlay=document.getElementById('overlay');
+  const gameOverTextEl=document.getElementById('gameOverText');
+  const btnRestart=document.getElementById('btnRestart');
+
   const ROUND_TIME = 30.0; // วินาที
+  const KEY_HISCORE = 'qr_breaker_hiscore_v1';
 
   const state={
     running:false, level:1, score:0, lives:1,
-    paddle:{x:canvas.width/2, y:canvas.height-28, w:50, h:12, speed:9},
-    ball:{x:canvas.width/2, y:canvas.height-80, r:6, vx:0, vy:0, speed:5},
+    // 👇 ยกถาดรองขึ้นสูงขึ้น (จาก -28 → -80)
+    paddle:{x:canvas.width/2, y:canvas.height-100, w:70, h:12, speed:9},
+    ball:{x:canvas.width/2, y:canvas.height-120, r:6, vx:0, vy:0, speed:5},
     bricks:[], gridMeta:null,
     qrImg:null, currentMatrix:null,
     gridScale:0.8,
     effects:[],
     timeLeft: ROUND_TIME,
     lastTS: null,
-    showGameOver:false,
-    gameOverText:''
+    showGameOver:false
   };
 
   // ---- responsive ----
@@ -153,27 +190,7 @@
       }
     }
   }
-  function drawUI(){
-    const b=state.ball;
-    if(state.showGameOver){
-      ctx.fillStyle='rgba(0,0,0,0.5)';
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.fillStyle='#fff';
-      ctx.textAlign='center';
-      ctx.font='bold 24px ui-sans-serif, system-ui';
-      ctx.fillText(state.gameOverText, canvas.width/2, canvas.height/2 - 8);
-      ctx.font='600 16px ui-sans-serif, system-ui';
-      ctx.fillText('เริ่มรอบใหม่…', canvas.width/2, canvas.height/2 + 18);
-      return;
-    }
-
-    if(!state.running && b.vx===0 && b.vy===0){
-      ctx.fillStyle='rgba(0,0,0,0.35)';
-      ctx.textAlign='center';
-      ctx.font='bold 20px ui-sans-serif, system-ui';
-      ctx.fillText('กด Space / แตะ เพื่อเริ่ม', canvas.width/2, canvas.height - 18);
-    }
-  }
+  function drawUI(){ /* ไม่มีปุ่มเริ่มแล้ว */ }
   function drawFrame(){
     ctx.clearRect(0,0,canvas.width,canvas.height);
     drawBricks();
@@ -197,6 +214,7 @@
     scoreEl.textContent=state.score;
     livesEl.textContent=state.lives;
     timeEl.textContent = Math.max(0, state.timeLeft).toFixed(1);
+    hiscoreEl.textContent = getHiScore();
   }
   function newRound(resetUUID=true){
     state.level=1;
@@ -206,24 +224,30 @@
     state.lastTS=null;
     state.effects.length=0;
     state.showGameOver=false;
+    overlay.classList.remove('show');
     updateHud();
+    // ตั้งตำแหน่งเริ่มใหม่ตาม paddle ที่สูงขึ้น
+    state.paddle.y = canvas.height-80;
+    state.ball.y = state.paddle.y - state.paddle.h/2 - state.ball.r - 2;
     resetBall(true);
     state.running=false;
-    if(resetUUID){ makeQRFromUUID(); }  // สุ่ม UUID ใหม่ทุกครั้งที่เริ่มรอบ
+    if(resetUUID){ makeQRFromUUID(); }
     drawFrame();
   }
 
   function gameOver(reason){
     state.running=false;
     state.showGameOver=true;
-    state.gameOverText = `Game Over • Score: ${state.score}`;
-    drawFrame();
-    // เริ่มรอบใหม่อัตโนมัติหลัง 1.2s พร้อมสุ่ม UUID ใหม่
-    setTimeout(()=> newRound(true), 1200);
+    // อัปเดต hi-score
+    const hs = getHiScore();
+    if(state.score > hs) setHiScore(state.score);
+    gameOverTextEl.textContent = `Game Over • Score: ${state.score}`;
+    overlay.classList.add('show'); // โชว์ปุ่ม Restart
+    drawFrame();                   // วาดเฟรมสุดท้าย (freeze)
   }
 
   function addReflectFlashStrong(cx, cy, baseR){
-    const ringColor = '#7dd3fc'; // ฟ้าใส
+    const ringColor = '#7dd3fc';
     state.effects.push({ kind:'ring', x: cx, y: cy, r: Math.max(3, baseR*0.4), growth: Math.max(2.2, baseR*0.25), alpha: 0.9, decay: 0.88, lineWidth: 3, color: ringColor });
     state.effects.push({ kind:'ring', x: cx, y: cy, r: Math.max(2, baseR*0.22), growth: Math.max(1.7, baseR*0.20), alpha: 0.75, decay: 0.88, lineWidth: 2, color: '#93c5fd' });
     const sparks = 8;
@@ -239,14 +263,21 @@
 
     // อัปเดตเวลา
     if(state.lastTS==null) state.lastTS = ts;
-    const dt = (ts - state.lastTS)/1000; // วินาที
+    const dt = (ts - state.lastTS)/1000;
     state.lastTS = ts;
+
+    if(state.showGameOver){
+      // ❄️ Freeze: ไม่อัปเดตฟิสิกส์/เวลา แค่โชว์เฟรมปัจจุบัน
+      drawFrame();
+      return;
+    }
+
     if(state.running){
       state.timeLeft -= dt;
       if(state.timeLeft<=0){
-        state.timeLeft=0;
-        updateHud();
-        return gameOver('timeup');
+        state.timeLeft=0; updateHud();
+        gameOver('timeup');
+        return;
       }
     }
     updateHud();
@@ -261,17 +292,20 @@
     if(b.y-b.r<0){ b.y=b.r; b.vy*=-1; }
     if(b.y-b.r>canvas.height){
       state.lives=0; updateHud();
-      return gameOver('dead');
+      gameOver('dead');
+      return;
     }
 
-    // ชนแพดเดิล
+    // ชนแพดเดิล (ดีดเล็กน้อยเพื่อคุมมุม)
     if(b.y+b.r>=p.y-p.h/2 && b.y-b.r<=p.y+p.h/2 && b.x>=p.x-p.w/2 && b.x<=p.x+p.w/2 && b.vy>0){
       const hitPos=(b.x-p.x)/(p.w/2);
       const angle=hitPos*(Math.PI/3);
-      const speed=Math.hypot(b.vx,b.vy)*1.015; // ดีดเล็กน้อยเฉพาะแพดเดิล
+      const speed=Math.hypot(b.vx,b.vy)*1.015;
       b.vx=Math.sin(angle)*speed;
       b.vy=-Math.cos(angle)*speed;
       b.y=p.y - p.h/2 - b.r - 1;
+      // กันลูกติด inside paddle
+      if(b.vy>0) b.vy*=-1;
     }
 
     // ชนอิฐดำ (ไม่มีบูสต์ความเร็ว)
@@ -314,17 +348,25 @@
     else if(typeof dirOrX==='number'){ p.x=dirOrX; }
     p.x=Math.max(p.w/2, Math.min(canvas.width-p.w/2, p.x));
   }
-  function launch(){ if(state.running) return; state.running=true; resetBall(false); }
+  function launch(){ if(state.running || state.showGameOver) return; state.running=true; resetBall(false); }
   addEventListener('keydown',e=>{ if(e.key==='ArrowLeft')movePaddle(-1); if(e.key==='ArrowRight')movePaddle(1); if(e.key===' ')launch(); });
   canvas.addEventListener('mousemove',e=>{ const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width; movePaddle((e.clientX-rect.left)*scaleX); });
   canvas.addEventListener('touchmove',e=>{ const t=e.touches[0]; if(!t) return; const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width; movePaddle((t.clientX-rect.left)*scaleX); e.preventDefault(); }, {passive:false});
   canvas.addEventListener('touchstart', ()=>launch(), {passive:true});
   canvas.addEventListener('click', ()=>launch());
 
-  // ---- QR helpers ----
+  // ---- QR + HiScore helpers ----
   function uuid12(){
     const bytes=(crypto&&crypto.getRandomValues)?crypto.getRandomValues(new Uint8Array(6)):new Uint8Array(6).map(()=>Math.floor(Math.random()*256));
     return Array.from(bytes).map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  function getHiScore(){
+    const v = parseInt(localStorage.getItem(KEY_HISCORE)||'0',10);
+    return Number.isFinite(v)?v:0;
+  }
+  function setHiScore(v){
+    localStorage.setItem(KEY_HISCORE, String(v));
+    hiscoreEl.textContent = v;
   }
   function loadImage(url){ return new Promise(resolve=>{ const img=new Image(); img.onload=()=>resolve(img); img.src=url; img.crossOrigin='anonymous'; }); }
   async function makeQRFromUUID(){
@@ -388,22 +430,28 @@
     state.gridMeta={ startX,startY,moduleSize,cols,rows };
   }
 
+  // ---- overlay restart ----
+  btnRestart.addEventListener('click', ()=>{
+    newRound(true); // สุ่ม UUID ใหม่แล้วเริ่มรอบใหม่
+  });
+
   // ---- init ----
+  function launch(){ if(state.running || state.showGameOver) return; state.running=true; resetBall(false); }
   function movePaddle(dirOrX){
     const p=state.paddle;
     if(typeof dirOrX==='number' && Math.abs(dirOrX)<=1){ p.x+=dirOrX*p.speed*2.2; }
     else if(typeof dirOrX==='number'){ p.x=dirOrX; }
     p.x=Math.max(p.w/2, Math.min(canvas.width-p.w/2, p.x));
   }
-  function launch(){ if(state.running) return; state.running=true; resetBall(false); }
-
   addEventListener('keydown',e=>{ if(e.key==='ArrowLeft')movePaddle(-1); if(e.key==='ArrowRight')movePaddle(1); if(e.key===' ')launch(); });
   canvas.addEventListener('mousemove',e=>{ const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width; movePaddle((e.clientX-rect.left)*scaleX); });
   canvas.addEventListener('touchmove',e=>{ const t=e.touches[0]; if(!t) return; const rect=canvas.getBoundingClientRect(); const scaleX=canvas.width/rect.width; movePaddle((t.clientX-rect.left)*scaleX); e.preventDefault(); }, {passive:false});
   canvas.addEventListener('touchstart', ()=>launch(), {passive:true});
   canvas.addEventListener('click', ()=>launch());
 
-  newRound(true);           // รีเซ็ตรอบ + สุ่ม UUID
+  // เริ่มเกมครั้งแรก
+  hiscoreEl.textContent = getHiScore();
+  newRound(true);
   requestAnimationFrame(step);
 
   // back button
