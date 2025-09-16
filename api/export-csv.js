@@ -1,2 +1,2 @@
-export { default } from '../back-end/api/export-csv.js';
+export { default } from './qr/export-csv.js';
 

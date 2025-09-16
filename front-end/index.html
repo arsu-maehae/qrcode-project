@@ -7,99 +7,160 @@
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0c10" />
   <style>
-    :root{ --bg:#0b0c10; --fg:#e5e7eb; --muted:#9ca3af; --card:#111318; --shadow:0 8px 32px rgba(0,0,0,.45); --accent:#2563eb;}
-    @media (prefers-color-scheme: light){ :root{ --bg:#ffffff; --fg:#0b0c10; --muted:#6b7280; --card:#f5f6f8; --shadow:0 6px 24px rgba(0,0,0,.08);} }
+    :root{
+      --bg:#0b0c10; --fg:#e5e7eb; --muted:#9ca3af;
+      --card:#111318; --shadow:0 8px 32px rgba(0,0,0,.45);
+      --accent:#2563eb;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#ffffff; --fg:#0b0c10; --muted:#6b7280;
+        --card:#f5f6f8; --shadow:0 6px 24px rgba(0,0,0,.08);
+      }
+    }
     html,body{height:100%;}
-    body{margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;}
-    main.center{min-height:100dvh; padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 96px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;}
+    body{
+      margin:0; background:var(--bg); color:var(--fg);
+      font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    }
+    main.center{
+      min-height:100dvh;
+      padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 96px);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    }
     .title{font-weight:800; letter-spacing:.2px; text-align:center; margin:0 0 6px;}
     .size{color:var(--muted); font-weight:700; letter-spacing:.2px; text-align:center;}
-    .qr-box{display:flex; align-items:center; justify-content:center; background:var(--card); padding:18px; border-radius:22px; box-shadow:var(--shadow); min-height: calc(min(78vw, 360px) + 36px);}
-    img.qr{ width:min(78vw, 360px); height:auto; aspect-ratio:1/1; border-radius:16px; background:#fff; display:block; }
-    .uuid{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.95rem; color:var(--muted); word-break:break-all; text-align:center;}
-    .btns{ display:flex; justify-content:center; align-items:center; gap:10px; width:min(92vw, 440px); flex-wrap:wrap; }
+    .qr-box{
+      display:flex; align-items:center; justify-content:center;
+      background:var(--card); padding:18px;
+      border-radius:22px; box-shadow:var(--shadow);
+      min-height: calc(min(78vw, 360px) + 36px);
+    }
+    img.qr{
+      width:min(78vw, 360px); height:auto; aspect-ratio:1/1;
+      border-radius:16px; background:#fff; display:block;
+    }
+    .uuid{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:.95rem; color:var(--muted); word-break:break-all; text-align:center;
+    }
+    .btns{
+      display:flex; justify-content:center; align-items:center;
+      gap:10px; width:min(92vw, 440px); flex-wrap:wrap;
+    }
     .btns > center{ display: contents; }
-    button{appearance:none; border:none; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:800; background:var(--accent); color:#fff; box-shadow:var(--shadow); min-height:44px;}
+    button{
+      appearance:none; border:none; cursor:pointer;
+      padding:12px 14px; border-radius:14px; font-weight:800;
+      background:var(--accent); color:#fff; box-shadow:var(--shadow); min-height:44px;
+    }
     .btn-dark{background:#111827;}
     .btn-good{background:#16a34a;}
-    .btn-float-right{position:fixed; top:calc(10px + env(safe-area-inset-top)); right:12px; z-index:1000; background:#0ea5e9;}
-    .btn-play{position:fixed; bottom:calc(16px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:min(92vw, 440px); z-index:1000; background:#22c55e; font-size:1.05rem; text-align:center; text-decoration:none; padding:10px 14px; border-radius:14px; color:#fff; font-weight:800;}
-    .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); padding:10px 14px; border-radius:12px; background:rgba(0,0,0,.85); color:#fff; z-index:9999;}
+    .btn-float-right{
+      position:fixed; top:calc(10px + env(safe-area-inset-top));
+      right:12px; z-index:1000; background:#0ea5e9;
+    }
+    .btn-play{
+      position:fixed; bottom:calc(16px + env(safe-area-inset-bottom));
+      left:50%; transform:translateX(-50%);
+      width:min(92vw, 440px); z-index:1000;
+      background:#22c55e; font-size:1.05rem; text-align:center;
+      text-decoration:none; padding:10px 14px; border-radius:14px; color:#fff; font-weight:800;
+    }
+    .toast{
+      position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+      padding:10px 14px; border-radius:12px;
+      background:rgba(0,0,0,.85); color:#fff; z-index:9999;
+    }
     .hidden{display:none !important;}
-    .btn-admin-left{ position:fixed; top:calc(10px + env(safe-area-inset-top)); left:12px; z-index:1000; background:#f59e0b; color:#111; font-weight:800; border:none; padding:10px 14px; border-radius:14px; box-shadow:var(--shadow); cursor:pointer;}
+    .btn-admin-left{
+      position:fixed; top:calc(10px + env(safe-area-inset-top)); left:12px;
+      z-index:1000; background:#f59e0b; color:#111; font-weight:800;
+      border:none; padding:10px 14px; border-radius:14px;
+      box-shadow:var(--shadow); cursor:pointer;
+    }
   </style>
 </head>
 <body>
-  <!-- ปุ่มแอดมิน -->
-  <button id="btnAdmin" class="btn-admin-left" type="button">ติดต่อแอดมิน</button>
+  <!-- ปุ่มแอดมิน มุมซ้ายบน -->
+  <button id="btnAdmin" class="btn-admin-left" type="button" aria-label="Admin Reset">ติดต่อแอดมิน</button>
 
-  <!-- ปุ่มไปฐานการเรียนรู้ -->
-  <a href="Extention.html" class="btn-float-right" style="text-decoration:none;padding:10px 14px;border-radius:14px;background:#0ea5e9;color:#fff;font-weight:800;">
-    ฐานการเรียนรู้
+  <!-- ปุ่มฐานการเรียนรู้ มุมขวาบน -->
+  <a href="Extention.html" class="btn-float-right"
+     style="display:inline-block;text-decoration:none;padding:10px 14px;border-radius:14px;background:#0ea5e9;color:#fff;font-weight:800;">
+     ฐานการเรียนรู้
   </a>
 
   <main class="center">
     <h1 class="title">คิวอาร์โค้ด</h1>
     <h1 class="title" style="color:#FF0000;">*สำคัญห้ามหาย*</h1>
+
     <div id="sizeLabel" class="size">ขนาด: —</div>
+
     <div class="qr-box"><img id="qrImg" class="qr" alt="QR"></div>
+
     <div class="uuid" id="uuidText">—</div>
+
     <div class="btns">
       <button id="btnGen">สุ่มคิวอาร์โค้ด</button>
       <button id="btnSave" class="btn-good hidden">บันทึกรูปคิวอาร์โค้ด</button>
       <button id="btnCopy" class="btn-dark hidden">คัดลอกรหัส</button>
     </div>
   </main>
-  <a id="btnPlay" href="game.html" class="btn-play">เล่นเกม</a>
 
-  <!-- โหลด Supabase client -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script>
-    // 👇 ใส่ค่าของคุณเองที่ได้จาก Supabase
-    const SUPABASE_URL = "https://yowjvmiosrclqstoeqat.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlvd2p2bWlvc3JjbHFzdG9lcWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMDc0OTksImV4cCI6MjA3MzU4MzQ5OX0.p71LqTM5gaJcpaAMMnWzLgsLNAka0nmR7BYntBiSYfU";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  </script>
+  <a id="btnPlay" href="game.html" class="btn-play">เล่นเกม</a>
 
   <!-- สคริปต์หลัก -->
   <script>
   (function(){
-    var img = document.getElementById('qrImg');
-    var sizeLabel = document.getElementById('sizeLabel');
-    var uuidText = document.getElementById('uuidText');
-    var btnGen = document.getElementById('btnGen');
-    var btnSave = document.getElementById('btnSave');
-    var btnCopy = document.getElementById('btnCopy');
-    var btnAdmin = document.getElementById('btnAdmin');
+    // ✅ ตั้งค่า API ของ backend (แก้ URL ให้ตรงโปรเจกต์ backend ของคุณ)
+    const API_BASE = location.hostname.includes('localhost')
+      ? ''
+      : 'https://qrcode-project-self.vercel.app';
 
-    var QR_PX = 1024;
-    var STORAGE_KEY = 'qr_locked_code_v1';
-    const ADMIN_PASS = '12345'; // รหัสแอดมิน (แก้ได้)
+    const img = document.getElementById('qrImg');
+    const sizeLabel = document.getElementById('sizeLabel');
+    const uuidText = document.getElementById('uuidText');
+    const btnGen = document.getElementById('btnGen');
+    const btnSave = document.getElementById('btnSave');
+    const btnCopy = document.getElementById('btnCopy');
+    const btnAdmin = document.getElementById('btnAdmin');
+
+    const QR_PX = 1024;
+    const STORAGE_KEY = 'qr_locked_code_v1';
+    const ADMIN_PASS = '12345';
 
     function toast(msg){
-      var el = document.createElement('div');
-      el.className = 'toast'; el.textContent = msg;
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.textContent = msg;
       document.body.appendChild(el);
       setTimeout(()=>el.remove(), 1400);
     }
-    function storageGet(){ try{ return localStorage.getItem(STORAGE_KEY) || ''; }catch(e){ return ''; } }
-    function storageSet(v){ try{ localStorage.setItem(STORAGE_KEY, v); }catch(e){} }
-    function storageDel(){ try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} }
+    const storageGet = () => { try { return localStorage.getItem(STORAGE_KEY) || ''; } catch { return ''; } };
+    const storageSet = v => { try { localStorage.setItem(STORAGE_KEY, v); } catch {} };
+    const storageDel = () => { try { localStorage.removeItem(STORAGE_KEY); } catch {} };
 
     function shortId(len){
-      var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      var arr = new Uint32Array(len); crypto.getRandomValues(arr);
-      return Array.from(arr).map(x => alphabet[x % alphabet.length]).join('');
+      const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const arr = new Uint32Array(len);
+      crypto.getRandomValues(arr);
+      return Array.from(arr).map(v => alphabet[v % alphabet.length]).join('');
     }
+
     function updateSizeLabel(){
-      if (img && img.naturalWidth) sizeLabel.textContent = 'ขนาด: ' + img.naturalWidth + '×' + img.naturalHeight + ' px';
-      else sizeLabel.textContent = 'ขนาด: ' + QR_PX + '×' + QR_PX + ' px';
+      if (img && img.naturalWidth)
+        sizeLabel.textContent = 'ขนาด: ' + img.naturalWidth + '×' + img.naturalHeight + ' px';
+      else
+        sizeLabel.textContent = 'ขนาด: ' + QR_PX + '×' + QR_PX + ' px';
     }
+
     function drawQR(text){
-      var base = 'https://api.qrserver.com/v1/create-qr-code/';
+      const base = 'https://api.qrserver.com/v1/create-qr-code/';
       img.src = base + '?size=' + QR_PX + 'x' + QR_PX + '&format=png&qzone=2&margin=2&data=' + encodeURIComponent(text);
       sizeLabel.textContent = 'ขนาด: ' + QR_PX + '×' + QR_PX + ' px';
     }
+
     function applyLockedUI(code){
       if (!code) return;
       uuidText.textContent = code;
@@ -109,46 +170,68 @@
       btnCopy.classList.remove('hidden');
     }
 
-    // บันทึกลง Supabase
-    async function saveToSupabase(code){
-      try {
-        let { data, error } = await supabase
-          .from('qrcodes')
-          .insert([{ code: code, user_agent: navigator.userAgent }]);
-        if (error) {
-          console.error(error); toast('❌ บันทึก Supabase ไม่สำเร็จ');
-        } else {
-          toast('✅ บันทึก Supabase แล้ว');
-        }
-      } catch(e){ console.error(e); toast('⚠️ บันทึกผิดพลาด'); }
+    async function sendToBackend(code){
+      try{
+        const res = await fetch(`${API_BASE}/api/qr/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uuid: code })
+        });
+        const json = await res.json().catch(()=> ({}));
+        if (!res.ok || !json?.ok) throw new Error(json?.error || res.statusText);
+        toast('บันทึกฐานข้อมูลสำเร็จ');
+      }catch(err){
+        console.error('sendToBackend error:', err);
+        toast('บันทึกฐานข้อมูลล้มเหลว (แต่คิวอาถูกล็อคในเครื่องแล้ว)');
+      }
     }
 
-    function handleGenerateOnce(){
-      var existed = storageGet();
-      if (existed) { applyLockedUI(existed); toast('คิวอาถูกล็อคไว้แล้ว'); return; }
-      var code = shortId(12);
-      storageSet(code);
-      applyLockedUI(code);
-      saveToSupabase(code);   // <<< บันทึกไป Supabase
-      toast('สร้างและล็อคคิวอาแล้ว');
+    async function handleGenerateOnce(){
+      if (btnGen) { btnGen.disabled = true; btnGen.style.opacity = .7; }
+      try{
+        const existed = storageGet();
+        if (existed) {
+          applyLockedUI(existed);
+          toast('คิวอาถูกล็อคไว้แล้ว — กำลังซิงก์เข้าฐาน');
+          await sendToBackend(existed);
+          return;
+        }
+        const code = shortId(12);
+        storageSet(code);
+        applyLockedUI(code);
+        toast('สร้างและล็อคคิวอาแล้ว');
+        await sendToBackend(code);
+      } finally {
+        if (btnGen) { btnGen.disabled = false; btnGen.style.opacity = 1; }
+      }
     }
 
     async function savePNG(){
       try{
         if(!img || !img.src){ toast('ยังไม่มีภาพ QR'); return; }
-        var res = await fetch(img.src); var blob = await res.blob();
-        var url = URL.createObjectURL(blob);
-        var name = ('qr-' + (uuidText.textContent || Date.now()) + '.png').replace(/[^a-zA-Z0-9._-]/g,'_');
-        var a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+        const res = await fetch(img.src, {mode:'cors', cache:'no-store'});
+        if(!res.ok) throw new Error('fetch failed');
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        const name = ('qr-' + (uuidText.textContent || Date.now()) + '.png').replace(/[^a-zA-Z0-9._-]/g,'_');
+        const a = document.createElement('a');
+        a.href = url; a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
         setTimeout(()=>URL.revokeObjectURL(url), 2000);
       }catch(e){ window.open(img.src, '_blank'); }
     }
+
     function copyCode(){
-      var txt = uuidText.textContent || '';
+      const txt = uuidText.textContent || '';
       if(!txt){ toast('ยังไม่มีรหัส'); return; }
-      navigator.clipboard?.writeText(txt);
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(txt);
+      else {
+        const ta = document.createElement('textarea');
+        ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      }
       toast('คัดลอกแล้ว');
     }
+
     function adminResetUI(){
       storageDel();
       uuidText.textContent = '—';
@@ -160,21 +243,33 @@
       toast('รีเซ็ตคิวอาแล้ว');
     }
 
-    btnAdmin.addEventListener('click', ()=>{
-      var input = prompt('รหัสแอดมิน');
+    btnAdmin?.addEventListener('click', ()=>{
+      const input = prompt('รหัสแอดมิน');
       if (input === null) return;
-      if ((input||'').trim() === ADMIN_PASS){
+      if ((input || '').trim() === ADMIN_PASS){
         if (confirm('ยืนยันรีเซ็ตคิวอาในเครื่องนี้?')) adminResetUI();
       } else toast('รหัสแอดมินไม่ถูกต้อง');
     });
 
-    img.addEventListener('load', updateSizeLabel);
-    btnGen.addEventListener('click', handleGenerateOnce);
-    btnSave.addEventListener('click', savePNG);
-    btnCopy.addEventListener('click', copyCode);
+    img?.addEventListener('load', updateSizeLabel);
+    btnGen?.addEventListener('click', handleGenerateOnce);
+    btnSave?.addEventListener('click', savePNG);
+    btnCopy?.addEventListener('click', copyCode);
+    img?.addEventListener('click', ()=> storageGet()
+      ? toast('คิวอาถูกล็อคแล้ว')
+      : toast('กด \"สุ่มคิวอา\" เพื่อสร้าง'));
 
-    var locked = storageGet();
-    if (locked){ applyLockedUI(locked); } else { uuidText.textContent = '—'; img.removeAttribute('src'); updateSizeLabel(); }
+    (async ()=>{
+      const locked = storageGet();
+      if (locked){
+        applyLockedUI(locked);
+        try { await sendToBackend(locked); } catch {}
+      } else {
+        uuidText.textContent = '—';
+        img.removeAttribute('src');
+        updateSizeLabel();
+      }
+    })();
   })();
   </script>
 </body>
