@@ -1,14 +1,40 @@
-import { withCORS } from '../_utils/cors';
-import { supaAdmin } from '../_lib/supa.js';
-import { v4 as uuidv4 } from 'uuid';
+// api/qr/create.js
+import { randomUUID } from 'node:crypto';
+import allowCors from '../_utils/cors.js';
+import { supabaseAdmin } from '../_lib/supa.js';
+
+export const config = { runtime: 'nodejs' };
 
 async function handler(req, res) {
+  // CORS headers (สำรอง ถ้าใน allowCors ครอบไว้อยู่แล้ว ไม่เป็นไร)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const id = uuidv4();
-  const { error } = await supaAdmin.from('qr_generations').insert({ uuid: id });
-  if (error) return res.status(400).json({ error: error.message });
+  try {
+    let body = {};
+    try { body = typeof req.body === 'object' ? req.body : JSON.parse(req.body || '{}'); } catch {}
 
-  res.status(200).json({ uuid: id, generated_at: new Date().toISOString() });
+    const incoming = body.uuid && String(body.uuid).trim();
+    const uuid = incoming || randomUUID();
+
+    const { error } = await supabaseAdmin
+      .from('qr_generations')
+      .upsert({ uuid }, { onConflict: 'uuid' });
+
+    if (error) {
+      console.error('[qr/create] insert error:', error);
+      return res.status(500).json({ ok: false, error: error.message });
+    }
+
+    return res.status(201).json({ ok: true, uuid });
+  } catch (e) {
+    console.error('[qr/create] exception:', e);
+    return res.status(500).json({ ok: false, error: 'Internal error' });
+  }
 }
-export default withCORS(handler);
+
+export default allowCors(handler);

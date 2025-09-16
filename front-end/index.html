@@ -10,35 +10,32 @@
     :root{ --bg:#0b0c10; --fg:#e5e7eb; --muted:#9ca3af; --card:#111318; --shadow:0 8px 32px rgba(0,0,0,.45); --accent:#2563eb;}
     @media (prefers-color-scheme: light){ :root{ --bg:#ffffff; --fg:#0b0c10; --muted:#6b7280; --card:#f5f6f8; --shadow:0 6px 24px rgba(0,0,0,.08);} }
     html,body{height:100%;}
-    body{margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;}
-    main.center{min-height:100dvh; padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 96px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;}
+    body{margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    main.center{min-height:100dvh; padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 96px);
+                display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;}
     .title{font-weight:800; letter-spacing:.2px; text-align:center; margin:0 0 6px;}
     .size{color:var(--muted); font-weight:700; letter-spacing:.2px; text-align:center;}
-    .qr-box{display:flex; align-items:center; justify-content:center; background:var(--card); padding:18px; border-radius:22px; box-shadow:var(--shadow); min-height: calc(min(78vw, 360px) + 36px);}
+    .qr-box{display:flex; align-items:center; justify-content:center; background:var(--card); padding:18px;
+            border-radius:22px; box-shadow:var(--shadow); min-height: calc(min(78vw, 360px) + 36px);}
     img.qr{ width:min(78vw, 360px); height:auto; aspect-ratio:1/1; border-radius:16px; background:#fff; display:block; }
-    .uuid{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.95rem; color:var(--muted); word-break:break-all; text-align:center;}
-
-    /* ปุ่มใต้ QR: ใช้ flex เพื่อให้สองปุ่มที่เหลืออยู่กลางเมื่อปุ่มสุ่มถูกซ่อน */
-    .btns{
-      display:flex; justify-content:center; align-items:center;
-      gap:10px; width:min(92vw, 440px); flex-wrap:wrap;
-    }
-    .btns > center{ display: contents; } /* เผื่อมี <center> ครอบปุ่ม */
-
-    button{appearance:none; border:none; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:800; background:var(--accent); color:#fff; box-shadow:var(--shadow); min-height:44px;}
+    .uuid{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.95rem; color:var(--muted);
+          word-break:break-all; text-align:center;}
+    .btns{display:flex; justify-content:center; align-items:center; gap:10px; width:min(92vw, 440px); flex-wrap:wrap;}
+    .btns > center{ display: contents; }
+    button{appearance:none; border:none; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:800;
+           background:var(--accent); color:#fff; box-shadow:var(--shadow); min-height:44px;}
     .btn-dark{background:#111827;}
     .btn-good{background:#16a34a;}
     .btn-float-right{position:fixed; top:calc(10px + env(safe-area-inset-top)); right:12px; z-index:1000; background:#0ea5e9;}
-    .btn-play{position:fixed; bottom:calc(16px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:min(92vw, 440px); z-index:1000; background:#22c55e; font-size:1.05rem; text-align:center; text-decoration:none; padding:10px 14px; border-radius:14px; color:#fff; font-weight:800;}
-    .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); padding:10px 14px; border-radius:12px; background:rgba(0,0,0,.85); color:#fff; z-index:9999;}
+    .btn-play{position:fixed; bottom:calc(16px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
+              width:min(92vw, 440px); z-index:1000; background:#22c55e; font-size:1.05rem; text-align:center;
+              text-decoration:none; padding:10px 14px; border-radius:14px; color:#fff; font-weight:800;}
+    .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); padding:10px 14px; border-radius:12px;
+           background:rgba(0,0,0,.85); color:#fff; z-index:9999;}
     .hidden{display:none !important;}
-
-    /* ปุ่มแอดมินมุมซ้ายบน */
-    .btn-admin-left{
-      position:fixed; top:calc(10px + env(safe-area-inset-top)); left:12px; z-index:1000;
-      background:#f59e0b; color:#111; font-weight:800; border:none;
-      padding:10px 14px; border-radius:14px; box-shadow:var(--shadow); cursor:pointer;
-    }
+    .btn-admin-left{position:fixed; top:calc(10px + env(safe-area-inset-top)); left:12px; z-index:1000;
+                    background:#f59e0b; color:#111; font-weight:800; border:none; padding:10px 14px; border-radius:14px;
+                    box-shadow:var(--shadow); cursor:pointer;}
   </style>
 </head>
 <body>
@@ -46,11 +43,10 @@
   <button id="btnAdmin" class="btn-admin-left" type="button" aria-label="Admin Reset">ติดต่อแอดมิน</button>
 
   <!-- ปุ่มฐานการเรียนรู้ มุมขวาบน -->
-  <a  href="Extention.html" class="btn-float-right"
-   style="display:inline-block;text-decoration:none;padding:10px 14px;border-radius:14px;background:#0ea5e9;color:#fff;font-weight:800;">
-  ฐานการเรียนรู้
-</a>
-
+  <a href="Extention.html" class="btn-float-right"
+     style="display:inline-block;text-decoration:none;padding:10px 14px;border-radius:14px;background:#0ea5e9;color:#fff;font-weight:800;">
+     ฐานการเรียนรู้
+  </a>
 
   <main class="center">
     <h1 class="title">คิวอาร์โค้ด</h1>
@@ -75,46 +71,45 @@
 
   <script>
   (function(){
-    // ====== Elements ======
-    var img = document.getElementById('qrImg');
-    var sizeLabel = document.getElementById('sizeLabel');
-    var uuidText = document.getElementById('uuidText');
-    var btnGen = document.getElementById('btnGen');
-    var btnSave = document.getElementById('btnSave');
-    var btnCopy = document.getElementById('btnCopy');
-    var btnTask = document.getElementById('btnTask');
-    var btnPlay = document.getElementById('btnPlay');
-    var btnAdmin = document.getElementById('btnAdmin');
+    // ===== Config API base (สำคัญสำหรับ live-server) =====
+    const API_BASE =
+      (location.origin.includes('localhost:3000') || location.hostname.endsWith('.vercel.app'))
+        ? ''                       // ใช้ relative ถ้าเสิร์ฟผ่าน backend
+        : 'http://localhost:3000'; // เปลี่ยนเป็นโดเมนจริงเมื่อ deploy
 
-    // ====== Config ======
-    var QR_PX = 1024;                  // ขนาดภาพ QR จริง (ไฟล์ PNG)
-    var STORAGE_KEY = 'qr_locked_code_v1'; // คีย์เก็บรหัสที่ล็อคต่อเครื่อง
-    const ADMIN_PASS = '12345';   // <<< เปลี่ยนรหัสแอดมินที่นี่
+    // ===== Elements =====
+    const img = document.getElementById('qrImg');
+    const sizeLabel = document.getElementById('sizeLabel');
+    const uuidText = document.getElementById('uuidText');
+    const btnGen = document.getElementById('btnGen');
+    const btnSave = document.getElementById('btnSave');
+    const btnCopy = document.getElementById('btnCopy');
+    const btnAdmin = document.getElementById('btnAdmin');
 
-    // ====== Utils ======
+    // ===== Config =====
+    const QR_PX = 1024;
+    const STORAGE_KEY = 'qr_locked_code_v1';
+    const ADMIN_PASS = '12345';
+
+    // ===== Utils =====
     function toast(msg){
-      var el = document.createElement('div');
+      const el = document.createElement('div');
       el.className = 'toast';
       el.textContent = msg;
       document.body.appendChild(el);
-      setTimeout(function(){ el.remove(); }, 1400);
+      setTimeout(()=>el.remove(), 1400);
     }
+    const storageGet = () => { try { return localStorage.getItem(STORAGE_KEY) || ''; } catch { return ''; } };
+    const storageSet = v => { try { localStorage.setItem(STORAGE_KEY, v); } catch {} };
+    const storageDel = () => { try { localStorage.removeItem(STORAGE_KEY); } catch {} };
 
-    function storageGet(){ try{ return localStorage.getItem(STORAGE_KEY) || ''; }catch(e){ return ''; } }
-    function storageSet(v){ try{ localStorage.setItem(STORAGE_KEY, v); }catch(e){} }
-    function storageDel(){ try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} }
-
-    // รหัสตัวอักษรอ่านง่าย (ไม่มี I/O)
     function shortId(len){
-      var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      var arr = new Uint32Array(len);
+      const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const arr = new Uint32Array(len);
       crypto.getRandomValues(arr);
-      var out = '';
-      for (var i=0;i<len;i++) out += alphabet[arr[i] % alphabet.length];
-      return out;
+      return Array.from(arr).map(v => alphabet[v % alphabet.length]).join('');
     }
 
-    // อัปเดต label ขนาด
     function updateSizeLabel(){
       if (img && img.naturalWidth) {
         sizeLabel.textContent = 'ขนาด: ' + img.naturalWidth + '×' + img.naturalHeight + ' px';
@@ -123,14 +118,12 @@
       }
     }
 
-    // วาด QR ด้วยบริการสาธารณะ (PNG)
     function drawQR(text){
-      var base = 'https://api.qrserver.com/v1/create-qr-code/';
+      const base = 'https://api.qrserver.com/v1/create-qr-code/';
       img.src = base + '?size=' + QR_PX + 'x' + QR_PX + '&format=png&qzone=2&margin=2&data=' + encodeURIComponent(text);
       sizeLabel.textContent = 'ขนาด: ' + QR_PX + '×' + QR_PX + ' px';
     }
 
-    // UI สถานะล็อกแล้ว
     function applyLockedUI(code){
       if (!code) return;
       uuidText.textContent = code;
@@ -140,50 +133,70 @@
       btnCopy.classList.remove('hidden');
     }
 
-    // สุ่มได้ครั้งเดียวต่อเครื่อง
-    function handleGenerateOnce(){
-      var existed = storageGet();
-      if (existed) {
-        applyLockedUI(existed);
-        toast('คิวอาถูกล็อคไว้แล้ว');
-        return;
+    async function sendToBackend(code){
+      try{
+        const res = await fetch(`${API_BASE}/api/qr/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uuid: code })
+        });
+        const json = await res.json().catch(()=> ({}));
+        if (!res.ok || !json?.ok) throw new Error(json?.error || res.statusText);
+        toast('บันทึกฐานข้อมูลสำเร็จ');
+      }catch(err){
+        console.error('sendToBackend error:', err);
+        toast('บันทึกฐานข้อมูลล้มเหลว (แต่คิวอาถูกล็อคในเครื่องแล้ว)');
       }
-      var code = shortId(12);
-      storageSet(code);
-      applyLockedUI(code);
-      toast('สร้างและล็อคคิวอาแล้ว');
+    }
+
+    // สุ่มได้ครั้งเดียวต่อเครื่อง + ส่งเข้า Back-end เสมอ
+    async function handleGenerateOnce(){
+      if (btnGen) { btnGen.disabled = true; btnGen.style.opacity = .7; }
+      try{
+        const existed = storageGet();
+        if (existed) {
+          applyLockedUI(existed);
+          toast('คิวอาถูกล็อคไว้แล้ว — กำลังซิงก์เข้าฐาน');
+          await sendToBackend(existed);
+          return;
+        }
+        const code = shortId(12);
+        storageSet(code);
+        applyLockedUI(code);
+        toast('สร้างและล็อคคิวอาแล้ว');
+        await sendToBackend(code);
+      } finally {
+        if (btnGen) { btnGen.disabled = false; btnGen.style.opacity = 1; }
+      }
     }
 
     async function savePNG(){
       try{
         if(!img || !img.src){ toast('ยังไม่มีภาพ QR'); return; }
-        var res = await fetch(img.src, {mode:'cors', cache:'no-store'});
+        const res = await fetch(img.src, {mode:'cors', cache:'no-store'});
         if(!res.ok) throw new Error('fetch failed');
-        var blob = await res.blob();
-        var url  = URL.createObjectURL(blob);
-        var name = ('qr-' + (uuidText.textContent || Date.now()) + '.png').replace(/[^a-zA-Z0-9._-]/g,'_');
-        var a = document.createElement('a');
+        const blob = await res.blob();
+        const url  = URL.createObjectURL(blob);
+        const name = ('qr-' + (uuidText.textContent || Date.now()) + '.png').replace(/[^a-zA-Z0-9._-]/g,'_');
+        const a = document.createElement('a');
         a.href = url; a.download = name;
         document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
-      }catch(e){
-        window.open(img.src, '_blank'); // กันพังกรณี CORS
-      }
+        setTimeout(()=>URL.revokeObjectURL(url), 2000);
+      }catch(e){ window.open(img.src, '_blank'); }
     }
 
     function copyCode(){
-      var txt = uuidText.textContent || '';
+      const txt = uuidText.textContent || '';
       if(!txt){ toast('ยังไม่มีรหัส'); return; }
-      if (navigator.clipboard && navigator.clipboard.writeText){
+      if (navigator.clipboard?.writeText) {
         navigator.clipboard.writeText(txt);
-      }else{
-        var ta = document.createElement('textarea');
+      } else {
+        const ta = document.createElement('textarea');
         ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
       }
       toast('คัดลอกแล้ว');
     }
 
-    // ====== ADMIN: ปุ่มรีเซ็ตด้วยรหัสผ่าน ======
     function adminResetUI(){
       storageDel();
       uuidText.textContent = '—';
@@ -195,9 +208,9 @@
       toast('รีเซ็ตคิวอาแล้ว — สามารถสุ่มใหม่ได้');
     }
 
-    btnAdmin && btnAdmin.addEventListener('click', ()=>{
-      var input = prompt('รหัสแอดมิน');
-      if (input === null) return; // กดยกเลิก
+    btnAdmin?.addEventListener('click', ()=>{
+      const input = prompt('รหัสแอดมิน');
+      if (input === null) return;
       if ((input || '').trim() === ADMIN_PASS){
         if (confirm('ยืนยันรีเซ็ตคิวอาในเครื่องนี้?')) adminResetUI();
       } else {
@@ -205,30 +218,27 @@
       }
     });
 
-    // ====== Events ======
-    img && img.addEventListener('load', updateSizeLabel);
-    btnGen && btnGen.addEventListener('click', handleGenerateOnce);
-    btnSave && btnSave.addEventListener('click', savePNG);
-    btnCopy && btnCopy.addEventListener('click', copyCode);
-
-    // คลิกรูป: ไม่ให้สุ่มซ้ำ
-    img && img.addEventListener('click', function(){
-      if (storageGet()){
-        toast('คิวอาถูกล็อคแล้ว');
-      } else {
-        toast('กด "สุ่มคิวอา" เพื่อสร้าง');
-      }
+    img?.addEventListener('load', updateSizeLabel);
+    btnGen?.addEventListener('click', handleGenerateOnce);
+    btnSave?.addEventListener('click', savePNG);
+    btnCopy?.addEventListener('click', copyCode);
+    img?.addEventListener('click', ()=>{
+      if (storageGet()) toast('คิวอาถูกล็อคแล้ว');
+      else toast('กด \"สุ่มคิวอา\" เพื่อสร้าง');
     });
 
-    // ====== First load ======
-    var locked = storageGet();
-    if (locked){
-      applyLockedUI(locked);
-    } else {
-      uuidText.textContent = '—';
-      img.removeAttribute('src');
-      updateSizeLabel();
-    }
+    // First load: ถ้ามีรหัสค้างอยู่ ให้ซิงก์ขึ้นฐานด้วย
+    (async ()=>{
+      const locked = storageGet();
+      if (locked){
+        applyLockedUI(locked);
+        try { await sendToBackend(locked); } catch {}
+      } else {
+        uuidText.textContent = '—';
+        img.removeAttribute('src');
+        updateSizeLabel();
+      }
+    })();
   })();
   </script>
 </body>

@@ -9,8 +9,6 @@
     "uuid": "^9.0.1"
   },
   "scripts": {
-    "dev": "vercel dev",
-    "start": "node",
     "lint": "echo \"no lint\""
   }
 }

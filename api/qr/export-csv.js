@@ -1,9 +1,9 @@
-import { withCORS } from '../_utils/cors';
-import { supaAdmin } from '../_lib/supa.js';
+import allowCors from '../_utils/cors.js';
+import supabaseAdmin from '../_lib/supa.js';
 import { stringify } from 'csv-stringify/sync';
 
 async function handler(req, res) {
-  const { data, error } = await supaAdmin
+  const { data, error } = await supabaseAdmin
     .from('qr_generations')
     .select('uuid, generated_at')
     .order('generated_at', { ascending: false });
@@ -15,5 +15,5 @@ async function handler(req, res) {
   res.setHeader('Content-Disposition', 'attachment; filename="qr_generations.csv"');
   res.status(200).send(csv);
 }
-export default withCORS(handler);
+export default allowCors(handler);
 
