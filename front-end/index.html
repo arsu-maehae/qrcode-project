@@ -7,35 +7,78 @@
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0c10" />
   <style>
-    :root{ --bg:#0b0c10; --fg:#e5e7eb; --muted:#9ca3af; --card:#111318; --shadow:0 8px 32px rgba(0,0,0,.45); --accent:#2563eb;}
-    @media (prefers-color-scheme: light){ :root{ --bg:#ffffff; --fg:#0b0c10; --muted:#6b7280; --card:#f5f6f8; --shadow:0 6px 24px rgba(0,0,0,.08);} }
+    :root{
+      --bg:#0b0c10; --fg:#e5e7eb; --muted:#9ca3af;
+      --card:#111318; --shadow:0 8px 32px rgba(0,0,0,.45);
+      --accent:#2563eb;
+    }
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg:#ffffff; --fg:#0b0c10; --muted:#6b7280;
+        --card:#f5f6f8; --shadow:0 6px 24px rgba(0,0,0,.08);
+      }
+    }
     html,body{height:100%;}
-    body{margin:0; background:var(--bg); color:var(--fg); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
-    main.center{min-height:100dvh; padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 96px);
-                display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;}
+    body{
+      margin:0; background:var(--bg); color:var(--fg);
+      font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+    }
+    main.center{
+      min-height:100dvh;
+      padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 96px);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    }
     .title{font-weight:800; letter-spacing:.2px; text-align:center; margin:0 0 6px;}
     .size{color:var(--muted); font-weight:700; letter-spacing:.2px; text-align:center;}
-    .qr-box{display:flex; align-items:center; justify-content:center; background:var(--card); padding:18px;
-            border-radius:22px; box-shadow:var(--shadow); min-height: calc(min(78vw, 360px) + 36px);}
-    img.qr{ width:min(78vw, 360px); height:auto; aspect-ratio:1/1; border-radius:16px; background:#fff; display:block; }
-    .uuid{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:.95rem; color:var(--muted);
-          word-break:break-all; text-align:center;}
-    .btns{display:flex; justify-content:center; align-items:center; gap:10px; width:min(92vw, 440px); flex-wrap:wrap;}
+    .qr-box{
+      display:flex; align-items:center; justify-content:center;
+      background:var(--card); padding:18px;
+      border-radius:22px; box-shadow:var(--shadow);
+      min-height: calc(min(78vw, 360px) + 36px);
+    }
+    img.qr{
+      width:min(78vw, 360px); height:auto; aspect-ratio:1/1;
+      border-radius:16px; background:#fff; display:block;
+    }
+    .uuid{
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:.95rem; color:var(--muted); word-break:break-all; text-align:center;
+    }
+    .btns{
+      display:flex; justify-content:center; align-items:center;
+      gap:10px; width:min(92vw, 440px); flex-wrap:wrap;
+    }
     .btns > center{ display: contents; }
-    button{appearance:none; border:none; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:800;
-           background:var(--accent); color:#fff; box-shadow:var(--shadow); min-height:44px;}
+    button{
+      appearance:none; border:none; cursor:pointer;
+      padding:12px 14px; border-radius:14px; font-weight:800;
+      background:var(--accent); color:#fff; box-shadow:var(--shadow); min-height:44px;
+    }
     .btn-dark{background:#111827;}
     .btn-good{background:#16a34a;}
-    .btn-float-right{position:fixed; top:calc(10px + env(safe-area-inset-top)); right:12px; z-index:1000; background:#0ea5e9;}
-    .btn-play{position:fixed; bottom:calc(16px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
-              width:min(92vw, 440px); z-index:1000; background:#22c55e; font-size:1.05rem; text-align:center;
-              text-decoration:none; padding:10px 14px; border-radius:14px; color:#fff; font-weight:800;}
-    .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); padding:10px 14px; border-radius:12px;
-           background:rgba(0,0,0,.85); color:#fff; z-index:9999;}
+    .btn-float-right{
+      position:fixed; top:calc(10px + env(safe-area-inset-top));
+      right:12px; z-index:1000; background:#0ea5e9;
+    }
+    .btn-play{
+      position:fixed; bottom:calc(16px + env(safe-area-inset-bottom));
+      left:50%; transform:translateX(-50%);
+      width:min(92vw, 440px); z-index:1000;
+      background:#22c55e; font-size:1.05rem; text-align:center;
+      text-decoration:none; padding:10px 14px; border-radius:14px; color:#fff; font-weight:800;
+    }
+    .toast{
+      position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
+      padding:10px 14px; border-radius:12px;
+      background:rgba(0,0,0,.85); color:#fff; z-index:9999;
+    }
     .hidden{display:none !important;}
-    .btn-admin-left{position:fixed; top:calc(10px + env(safe-area-inset-top)); left:12px; z-index:1000;
-                    background:#f59e0b; color:#111; font-weight:800; border:none; padding:10px 14px; border-radius:14px;
-                    box-shadow:var(--shadow); cursor:pointer;}
+    .btn-admin-left{
+      position:fixed; top:calc(10px + env(safe-area-inset-top)); left:12px;
+      z-index:1000; background:#f59e0b; color:#111; font-weight:800;
+      border:none; padding:10px 14px; border-radius:14px;
+      box-shadow:var(--shadow); cursor:pointer;
+    }
   </style>
 </head>
 <body>
@@ -54,9 +97,7 @@
 
     <div id="sizeLabel" class="size">ขนาด: —</div>
 
-    <div class="qr-box">
-      <img id="qrImg" class="qr" alt="QR">
-    </div>
+    <div class="qr-box"><img id="qrImg" class="qr" alt="QR"></div>
 
     <div class="uuid" id="uuidText">—</div>
 
@@ -69,15 +110,14 @@
 
   <a id="btnPlay" href="game.html" class="btn-play">เล่นเกม</a>
 
+  <!-- สคริปต์หลัก -->
   <script>
   (function(){
-    // ===== Config API base (สำคัญสำหรับ live-server) =====
-    const API_BASE =
-      (location.origin.includes('localhost:3000') || location.hostname.endsWith('.vercel.app'))
-        ? ''                       // ใช้ relative ถ้าเสิร์ฟผ่าน backend
-        : 'http://localhost:3000'; // เปลี่ยนเป็นโดเมนจริงเมื่อ deploy
+    // ✅ ตั้งค่า API ของ backend (แก้ URL ให้ตรงโปรเจกต์ backend ของคุณ)
+    const API_BASE = location.hostname.includes('localhost')
+      ? ''
+      : 'https://qrcode-project-self.vercel.app';
 
-    // ===== Elements =====
     const img = document.getElementById('qrImg');
     const sizeLabel = document.getElementById('sizeLabel');
     const uuidText = document.getElementById('uuidText');
@@ -86,12 +126,10 @@
     const btnCopy = document.getElementById('btnCopy');
     const btnAdmin = document.getElementById('btnAdmin');
 
-    // ===== Config =====
     const QR_PX = 1024;
     const STORAGE_KEY = 'qr_locked_code_v1';
     const ADMIN_PASS = '12345';
 
-    // ===== Utils =====
     function toast(msg){
       const el = document.createElement('div');
       el.className = 'toast';
@@ -111,11 +149,10 @@
     }
 
     function updateSizeLabel(){
-      if (img && img.naturalWidth) {
+      if (img && img.naturalWidth)
         sizeLabel.textContent = 'ขนาด: ' + img.naturalWidth + '×' + img.naturalHeight + ' px';
-      } else {
+      else
         sizeLabel.textContent = 'ขนาด: ' + QR_PX + '×' + QR_PX + ' px';
-      }
     }
 
     function drawQR(text){
@@ -149,7 +186,6 @@
       }
     }
 
-    // สุ่มได้ครั้งเดียวต่อเครื่อง + ส่งเข้า Back-end เสมอ
     async function handleGenerateOnce(){
       if (btnGen) { btnGen.disabled = true; btnGen.style.opacity = .7; }
       try{
@@ -188,9 +224,8 @@
     function copyCode(){
       const txt = uuidText.textContent || '';
       if(!txt){ toast('ยังไม่มีรหัส'); return; }
-      if (navigator.clipboard?.writeText) {
-        navigator.clipboard.writeText(txt);
-      } else {
+      if (navigator.clipboard?.writeText) navigator.clipboard.writeText(txt);
+      else {
         const ta = document.createElement('textarea');
         ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
       }
@@ -205,7 +240,7 @@
       btnGen.classList.remove('hidden');
       btnSave.classList.add('hidden');
       btnCopy.classList.add('hidden');
-      toast('รีเซ็ตคิวอาแล้ว — สามารถสุ่มใหม่ได้');
+      toast('รีเซ็ตคิวอาแล้ว');
     }
 
     btnAdmin?.addEventListener('click', ()=>{
@@ -213,21 +248,17 @@
       if (input === null) return;
       if ((input || '').trim() === ADMIN_PASS){
         if (confirm('ยืนยันรีเซ็ตคิวอาในเครื่องนี้?')) adminResetUI();
-      } else {
-        toast('รหัสแอดมินไม่ถูกต้อง');
-      }
+      } else toast('รหัสแอดมินไม่ถูกต้อง');
     });
 
     img?.addEventListener('load', updateSizeLabel);
     btnGen?.addEventListener('click', handleGenerateOnce);
     btnSave?.addEventListener('click', savePNG);
     btnCopy?.addEventListener('click', copyCode);
-    img?.addEventListener('click', ()=>{
-      if (storageGet()) toast('คิวอาถูกล็อคแล้ว');
-      else toast('กด \"สุ่มคิวอา\" เพื่อสร้าง');
-    });
+    img?.addEventListener('click', ()=> storageGet()
+      ? toast('คิวอาถูกล็อคแล้ว')
+      : toast('กด \"สุ่มคิวอา\" เพื่อสร้าง'));
 
-    // First load: ถ้ามีรหัสค้างอยู่ ให้ซิงก์ขึ้นฐานด้วย
     (async ()=>{
       const locked = storageGet();
       if (locked){
