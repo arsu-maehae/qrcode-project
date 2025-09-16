@@ -17,7 +17,14 @@
     .qr-box{display:flex; align-items:center; justify-content:center; background:var(--card); padding:18px; border-radius:22px; box-shadow:var(--shadow); min-height: calc(min(78vw, 360px) + 36px);}
     img.qr{ width:min(78vw, 360px); height:auto; aspect-ratio:1/1; border-radius:16px; background:#fff; display:block; }
     .uuid{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:.95rem; color:var(--muted); word-break:break-all; text-align:center;}
-    .btns{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; width:min(92vw, 440px);}
+
+    /* ปุ่มใต้ QR: ใช้ flex เพื่อให้สองปุ่มที่เหลืออยู่กลางเมื่อปุ่มสุ่มถูกซ่อน */
+    .btns{
+      display:flex; justify-content:center; align-items:center;
+      gap:10px; width:min(92vw, 440px); flex-wrap:wrap;
+    }
+    .btns > center{ display: contents; } /* เผื่อมี <center> ครอบปุ่ม */
+
     button{appearance:none; border:none; cursor:pointer; padding:12px 14px; border-radius:14px; font-weight:800; background:var(--accent); color:#fff; box-shadow:var(--shadow); min-height:44px;}
     .btn-dark{background:#111827;}
     .btn-good{background:#16a34a;}
@@ -25,9 +32,19 @@
     .btn-play{position:fixed; bottom:calc(16px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:min(92vw, 440px); z-index:1000; background:#22c55e; font-size:1.05rem; text-align:center; text-decoration:none; padding:10px 14px; border-radius:14px; color:#fff; font-weight:800;}
     .toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); padding:10px 14px; border-radius:12px; background:rgba(0,0,0,.85); color:#fff; z-index:9999;}
     .hidden{display:none !important;}
+
+    /* ปุ่มแอดมินมุมซ้ายบน */
+    .btn-admin-left{
+      position:fixed; top:calc(10px + env(safe-area-inset-top)); left:12px; z-index:1000;
+      background:#f59e0b; color:#111; font-weight:800; border:none;
+      padding:10px 14px; border-radius:14px; box-shadow:var(--shadow); cursor:pointer;
+    }
   </style>
 </head>
 <body>
+  <!-- ปุ่มแอดมิน มุมซ้ายบน -->
+  <button id="btnAdmin" class="btn-admin-left" type="button" aria-label="Admin Reset">ติดต่อแอดมิน</button>
+
   <!-- ปุ่มฐานการเรียนรู้ มุมขวาบน -->
   <a  href="Extention.html" class="btn-float-right"
    style="display:inline-block;text-decoration:none;padding:10px 14px;border-radius:14px;background:#0ea5e9;color:#fff;font-weight:800;">
@@ -38,25 +55,21 @@
   <main class="center">
     <h1 class="title">คิวอาร์โค้ด</h1>
 
-    <!-- ขนาดพิกเซลของไฟล์ QR -->
     <div id="sizeLabel" class="size">ขนาด: —</div>
 
     <div class="qr-box">
       <img id="qrImg" class="qr" alt="QR">
     </div>
 
-    <!-- แสดงรหัสสั้นที่ใช้เข้ารหัสใน QR จริง -->
     <div class="uuid" id="uuidText">—</div>
 
-    <!-- ปุ่มสามปุ่มตรงกลางใต้ QR -->
     <div class="btns">
-      <button id="btnGen">สุ่มคิวอา </button>
-      <button id="btnSave" class="btn-good hidden">บันทึกรูปคิวอา</button>
-      <button id="btnCopy" class="btn-dark hidden">คัดลอกรหัส</button> 
+      <button id="btnGen">สุ่มคิวอาร์โค้ด</button>
+      <button id="btnSave" class="btn-good hidden">บันทึกรูปคิวอาร์โค้ด</button>
+      <button id="btnCopy" class="btn-dark hidden">คัดลอกรหัส</button>
     </div>
   </main>
 
-  <!-- ปุ่มเล่นเกม กลางล่าง -->
   <a id="btnPlay" href="game.html" class="btn-play">เล่นเกม</a>
 
   <script>
@@ -70,10 +83,12 @@
     var btnCopy = document.getElementById('btnCopy');
     var btnTask = document.getElementById('btnTask');
     var btnPlay = document.getElementById('btnPlay');
+    var btnAdmin = document.getElementById('btnAdmin');
 
     // ====== Config ======
-    var QR_PX = 1024; // ขนาดไฟล์ PNG ของ QR
-    var STORAGE_KEY = 'qr_locked_code_v1'; // เก็บรหัสที่ล็อคต่อเครื่อง
+    var QR_PX = 1024;                  // ขนาดภาพ QR จริง (ไฟล์ PNG)
+    var STORAGE_KEY = 'qr_locked_code_v1'; // คีย์เก็บรหัสที่ล็อคต่อเครื่อง
+    const ADMIN_PASS = '12345';   // <<< เปลี่ยนรหัสแอดมินที่นี่
 
     // ====== Utils ======
     function toast(msg){
@@ -84,14 +99,11 @@
       setTimeout(function(){ el.remove(); }, 1400);
     }
 
-    function storageGet(){
-      try{ return localStorage.getItem(STORAGE_KEY) || ''; }catch(e){ return ''; }
-    }
-    function storageSet(v){
-      try{ localStorage.setItem(STORAGE_KEY, v); }catch(e){}
-    }
+    function storageGet(){ try{ return localStorage.getItem(STORAGE_KEY) || ''; }catch(e){ return ''; } }
+    function storageSet(v){ try{ localStorage.setItem(STORAGE_KEY, v); }catch(e){} }
+    function storageDel(){ try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} }
 
-    // รหัสสั้นจริง (ไม่ใช่แค่แสดง) — ใช้ตัวอักษรอ่านง่าย (ไม่มี I/O)
+    // รหัสตัวอักษรอ่านง่าย (ไม่มี I/O)
     function shortId(len){
       var alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       var arr = new Uint32Array(len);
@@ -101,7 +113,7 @@
       return out;
     }
 
-    // อัปเดต "ขนาด: W×H px" จากขนาดไฟล์จริง
+    // อัปเดต label ขนาด
     function updateSizeLabel(){
       if (img && img.naturalWidth) {
         sizeLabel.textContent = 'ขนาด: ' + img.naturalWidth + '×' + img.naturalHeight + ' px';
@@ -110,35 +122,32 @@
       }
     }
 
-    // สร้างภาพ QR ผ่านบริการสาธารณะ (ไฟล์ PNG)
+    // วาด QR ด้วยบริการสาธารณะ (PNG)
     function drawQR(text){
       var base = 'https://api.qrserver.com/v1/create-qr-code/';
       img.src = base + '?size=' + QR_PX + 'x' + QR_PX + '&format=png&qzone=2&margin=2&data=' + encodeURIComponent(text);
       sizeLabel.textContent = 'ขนาด: ' + QR_PX + '×' + QR_PX + ' px';
     }
 
-    // เปลี่ยน UI เป็นสถานะ "ล็อคแล้ว"
+    // UI สถานะล็อกแล้ว
     function applyLockedUI(code){
       if (!code) return;
       uuidText.textContent = code;
       drawQR(code);
-      // ซ่อนปุ่มสุ่ม / โชว์ปุ่มใช้งาน
       btnGen.classList.add('hidden');
       btnSave.classList.remove('hidden');
       btnCopy.classList.remove('hidden');
     }
 
-    // ====== Actions ======
+    // สุ่มได้ครั้งเดียวต่อเครื่อง
     function handleGenerateOnce(){
-      // ถ้ามีของเดิมอยู่แล้ว ให้ล็อคไว้และไม่อนุญาตสุ่มใหม่
       var existed = storageGet();
       if (existed) {
         applyLockedUI(existed);
         toast('คิวอาถูกล็อคไว้แล้ว');
         return;
       }
-      // ยังไม่เคยมี => สุ่มครั้งแรก แล้ว "ล็อค"
-      var code = shortId(12); // ปรับความยาวได้ เช่น 8/10/16
+      var code = shortId(12);
       storageSet(code);
       applyLockedUI(code);
       toast('สร้างและล็อคคิวอาแล้ว');
@@ -149,20 +158,15 @@
         if(!img || !img.src){ toast('ยังไม่มีภาพ QR'); return; }
         var res = await fetch(img.src, {mode:'cors', cache:'no-store'});
         if(!res.ok) throw new Error('fetch failed');
-        var blob = await res.blob(); // image/png
+        var blob = await res.blob();
         var url  = URL.createObjectURL(blob);
         var name = ('qr-' + (uuidText.textContent || Date.now()) + '.png').replace(/[^a-zA-Z0-9._-]/g,'_');
-
         var a = document.createElement('a');
-        a.href = url;
-        a.download = name;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        a.href = url; a.download = name;
+        document.body.appendChild(a); a.click(); a.remove();
         setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
       }catch(e){
-        // เผื่อกรณีโดนบล็อก CORS แรง ๆ — เปิดแทน
-        window.open(img.src, '_blank');
+        window.open(img.src, '_blank'); // กันพังกรณี CORS
       }
     }
 
@@ -178,13 +182,35 @@
       toast('คัดลอกแล้ว');
     }
 
+    // ====== ADMIN: ปุ่มรีเซ็ตด้วยรหัสผ่าน ======
+    function adminResetUI(){
+      storageDel();
+      uuidText.textContent = '—';
+      if (img) img.removeAttribute('src');
+      updateSizeLabel();
+      btnGen.classList.remove('hidden');
+      btnSave.classList.add('hidden');
+      btnCopy.classList.add('hidden');
+      toast('รีเซ็ตคิวอาแล้ว — สามารถสุ่มใหม่ได้');
+    }
+
+    btnAdmin && btnAdmin.addEventListener('click', ()=>{
+      var input = prompt('รหัสแอดมิน');
+      if (input === null) return; // กดยกเลิก
+      if ((input || '').trim() === ADMIN_PASS){
+        if (confirm('ยืนยันรีเซ็ตคิวอาในเครื่องนี้?')) adminResetUI();
+      } else {
+        toast('รหัสแอดมินไม่ถูกต้อง');
+      }
+    });
+
     // ====== Events ======
     img && img.addEventListener('load', updateSizeLabel);
     btnGen && btnGen.addEventListener('click', handleGenerateOnce);
     btnSave && btnSave.addEventListener('click', savePNG);
     btnCopy && btnCopy.addEventListener('click', copyCode);
 
-    // ป้องกันการสุ่มซ้ำจากการคลิกรูป
+    // คลิกรูป: ไม่ให้สุ่มซ้ำ
     img && img.addEventListener('click', function(){
       if (storageGet()){
         toast('คิวอาถูกล็อคแล้ว');
@@ -193,18 +219,13 @@
       }
     });
 
-    btnTask && btnTask.addEventListener('click', function(){ /* optional toast */ });
-    btnPlay && btnPlay.addEventListener('click', function(){ /* optional toast */ });
-
     // ====== First load ======
-    // ถ้าเคยล็อคแล้ว ให้แสดง QR เดิมและซ่อนปุ่มสุ่ม
     var locked = storageGet();
     if (locked){
       applyLockedUI(locked);
     } else {
-      // ครั้งแรก: แสดงแค่ปุ่มสุ่ม (ปุ่มอื่นถูกซ่อนไว้แล้วด้วย .hidden)
       uuidText.textContent = '—';
-      img.removeAttribute('src'); // รอจนกว่าจะสุ่ม
+      img.removeAttribute('src');
       updateSizeLabel();
     }
   })();
