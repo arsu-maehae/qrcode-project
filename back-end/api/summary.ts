@@ -15,9 +15,9 @@ function setCORS(req: any, res: any) {
 }
 
 function envs(){
-  const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env as Record<string,string|undefined>;
-  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) throw new Error('Supabase env not configured');
-  return { SUPABASE_URL: SUPABASE_URL.replace(/\/$/, ''), SUPABASE_SERVICE_ROLE_KEY };
+  const { SUPABASE_URL, SUPABASE_SERVICE_ROLE } = process.env as Record<string,string|undefined>;
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE) throw new Error('Supabase env not configured');
+  return { SUPABASE_URL: SUPABASE_URL.replace(/\/$/, ''), SUPABASE_SERVICE_ROLE };
 }
 
 import { getAdminClient } from '../shared/db.js';

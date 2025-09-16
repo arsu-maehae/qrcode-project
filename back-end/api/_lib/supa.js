@@ -1,6 +1,6 @@
 // Minimal Supabase PostgREST client using fetch, no dependencies
 const { SUPABASE_URL } = process.env;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE;
+const key = process.env.SUPABASE_SERVICE_ROLE;
 
 function baseHeaders() {
   return {
