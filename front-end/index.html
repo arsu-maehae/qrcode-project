@@ -113,7 +113,6 @@
   <!-- สคริปต์หลัก -->
   <script>
   (function(){
-    // ✅ ตั้งค่า API ของ backend (แก้ URL ให้ตรงโปรเจกต์ backend ของคุณ)
     const API_BASE = location.hostname.includes('localhost')
       ? ''
       : 'https://qrcode-project-self.vercel.app';
@@ -232,23 +231,16 @@
       toast('คัดลอกแล้ว');
     }
 
-    function adminResetUI(){
-      storageDel();
-      uuidText.textContent = '—';
-      if (img) img.removeAttribute('src');
-      updateSizeLabel();
-      btnGen.classList.remove('hidden');
-      btnSave.classList.add('hidden');
-      btnCopy.classList.add('hidden');
-      toast('รีเซ็ตคิวอาแล้ว');
-    }
-
+    // ✅ เปลี่ยนโค้ดปุ่มแอดมิน
     btnAdmin?.addEventListener('click', ()=>{
       const input = prompt('รหัสแอดมิน');
       if (input === null) return;
       if ((input || '').trim() === ADMIN_PASS){
-        if (confirm('ยืนยันรีเซ็ตคิวอาในเครื่องนี้?')) adminResetUI();
-      } else toast('รหัสแอดมินไม่ถูกต้อง');
+        try { sessionStorage.setItem('admin_ok', '1'); } catch {}
+        location.href = 'admin.html';
+      } else {
+        toast('รหัสแอดมินไม่ถูกต้อง');
+      }
     });
 
     img?.addEventListener('load', updateSizeLabel);
