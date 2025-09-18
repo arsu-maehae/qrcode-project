@@ -2,13 +2,33 @@
   "name": "qrcode-project",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
+    "cors": "^2.8.5",
     "csv-stringify": "^6.5.0",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "node-fetch": "^3.3.2",
     "uuid": "^9.0.1"
   },
   "scripts": {
     "lint": "echo \"no lint\""
-  }
+  },
+  "version": "1.0.0",
+  "description": "Front-end only prototype (Phase 1) is upgraded with a minimal backend using:\r - Supabase (Postgres + PostgREST) for persistence\r - Vercel Serverless API (TypeScript, Edge runtime) for endpoints and CORS",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arsu-maehae/qrcode-project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arsu-maehae/qrcode-project/issues"
+  },
+  "homepage": "https://github.com/arsu-maehae/qrcode-project#readme"
 }
